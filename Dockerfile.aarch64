@@ -1,0 +1,48 @@
+FROM golang:1.22.4-alpine AS builder
+# 最新的 alpine 镜像没有一些工具，例如（`git` 和 `bash`）。
+# 将 git、bash 和 openssh 添加到镜像中
+RUN apk add --no-cache git make bash ca-certificates tzdata
+
+# 镜像设置必要的环境变量
+# 工作目录名称 app
+
+ENV PROJECT_DIR=/app \
+    GO111MODULE=on \
+    CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64 \
+    GOPROXY="https://goproxy.cn" \
+    TZ=Asia/Shanghai \
+    APP_ENV=docker
+
+# 移动到工作目录
+RUN mkdir -p ${PROJECT_DIR}
+# 设置工作目录
+WORKDIR ${PROJECT_DIR}
+
+# 复制项目中的 go.mod 和 go.sum文件并下载依赖信息
+COPY go.mod go.sum ./
+# 下载依赖
+RUN go mod download
+
+# 复制项目的源代码
+COPY . .
+
+# Build the Go app
+RUN make build
+
+# 使用轻量级的 alpine 镜像作为运行环境
+# FROM alpine:latest
+FROM alpine:3.16
+
+# 创建工作目录
+WORKDIR /app
+
+# 从构建阶段复制可执行文件
+COPY --from=builder /app/main /app/main
+
+# Expose ports for the application
+EXPOSE 8080
+
+# 运行应用
+CMD ["./main"]

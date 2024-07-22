@@ -1,0 +1,96 @@
+# yaml 配置
+# 官方文档：https://docs.docker.com/compose/compose-file/
+
+services: # 定义一组服务
+  app:
+    container_name: app_container # 容器名称
+    # build:. # 从当前文件夹下的 Dockerfile构建上下文,如果要指向其他
+    build:
+      context: ./ # 指定构建上下文的路径
+      dockerfile: Dockerfile # 指定 Dockerfile 文件
+    restart: on-failure # 容器在失败时重新启动
+    depends_on: # 定义依赖关系，确保这些服务在该服务之前启动
+      - pg
+      - redis
+    links: # 连接到另一个容器，- 服务名称 [:]
+      - pg
+      - redis
+    ports:
+      - "8080:8080" # 将宿主机的 8080 端口映射到容器的 8080 端口
+    environment: # 定义环境变量
+      APP_ENV: docker
+      DB_HOST: pg
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_NAME: meow_app
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    networks:
+      - backend # 连接到 backend 网络
+    healthcheck: # 健康检查配置
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ] # 用于健康检查的命令
+      interval: 1m30s # 检查间隔时间
+      timeout: 10s # 命令超时时间
+      retries: 3 # 最大重试次数
+      start_period: 40s # 容器启动后等待时间再开始健康检查
+
+  pg:
+    image: arm64v8/postgres:16.1-alpine
+    container_name: pg_container # 容器名称
+    ports:
+      - "5432:5432" # 将宿主机的 5432 端口映射到容器的 5432 端口
+    expose:
+      - "5432" # 仅在内部网络中暴露端口
+    environment: # 定义环境变量
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: meow_app
+      TZ: Asia/Shanghai # 设置时区
+    healthcheck: # 健康检查配置
+      test: [ "CMD", "pg_isready", "-U", "test_user", "-d", "meow_app" ] # 用于健康检查的命令
+      timeout: 20s # 命令超时时间
+      retries: 10 # 最大重试次数
+      start_period: 40s # 容器启动后等待时间再开始健康检查
+    stdin_open: true # 保持标准输入打开
+    tty: true # 启用虚拟终端
+    volumes: # 挂载卷
+      - postgres_data:/var/lib/postgresql/data # 持久化数据库数据
+      - ./init-db:/docker-entrypoint-initdb.d # 初始化脚本目录
+      # - ./custom_pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf # 自定义配置文件路径（注释掉了）
+    networks:
+      - backend # 连接到 backend 网络
+
+  pgadmin:
+    image: dpage/pgadmin4 # 使用 pgAdmin4 镜像
+    ports:
+      - "5050:80" # 将宿主机的 5050 端口映射到容器的 80 端口
+    environment: # 定义环境变量
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on: # 定义依赖关系
+      - pg
+    networks:
+      - backend # 连接到 backend 网络
+
+  redis:
+    container_name: redis_container # 容器名称
+    image: redis:latest # 使用最新的 Redis 镜像
+    ports:
+      - "6379:6379" # 将宿主机的 6379 端口映射到容器的 6379 端口
+    expose:
+      - "6379" # 仅在内部网络中暴露端口
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend # 连接到 backend 网络
+
+networks:
+  backend:
+    driver: bridge # 使用桥接网络驱动
+  frontend:
+    driver: bridge # 使用桥接网络驱动
+
+volumes:
+  postgres_data: # 定义持久化存储卷
+  redis_data: # 定义持久化存储卷
