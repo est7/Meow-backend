@@ -1,7 +1,7 @@
 FROM golang:1.22.4-alpine AS builder
 
 # 添加必要的工具
-RUN apk add --no-cache git make bash ca-certificates tzdata
+RUN apk add --no-cache git make bash ca-certificates tzdata curl file
 
 # 设置环境变量
 ENV PROJECT_DIR=/app \
@@ -15,7 +15,6 @@ ENV PROJECT_DIR=/app \
     APP_ENV=docker
 
 # 创建并设置工作目录
-RUN mkdir -p ${PROJECT_DIR}
 WORKDIR ${PROJECT_DIR}
 
 # 复制依赖文件并下载依赖
@@ -31,15 +30,14 @@ RUN cat Makefile
 # 编译应用
 RUN make build
 
-
 # 确保构建产物存在
-RUN ls -l ${PROJECT_DIR}/${BINARY_NAME}
+RUN ls -l ${BINARY_NAME}
 
 # 第二阶段：运行环境
 FROM alpine:latest
 
-# 添加必要的工具
-RUN apk add --no-cache git make bash ca-certificates tzdata curl
+# 添加必要的工具，包括 file 命令
+RUN apk add --no-cache git make bash ca-certificates tzdata curl file
 
 # 设置二进制文件名称
 ENV BINARY_NAME=meow_backend_artifact
