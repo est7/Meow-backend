@@ -6,6 +6,14 @@ require (
 	github.com/gin-gonic/gin v1.9.0
 	github.com/lib/pq v1.10.9
 	github.com/redis/go-redis/v9 v9.6.0
+	github.com/spf13/viper v1.15.0
+	github.com/swaggo/files v1.0.0
+	github.com/swaggo/gin-swagger v1.5.3
+	github.com/swaggo/swag v1.8.10
+	github.com/thanhpk/randstr v1.0.4
+	github.com/vanng822/go-premailer v1.20.1
+	golang.org/x/crypto v0.9.0
+	golang.org/x/net v0.10.0
 )
 
 require (
@@ -30,8 +38,6 @@ require (
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.9 // indirect
 	golang.org/x/arch v0.0.0-20210923205945-b76863e36670 // indirect
-	golang.org/x/crypto v0.9.0 // indirect
-	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect

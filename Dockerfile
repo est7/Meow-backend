@@ -1,12 +1,11 @@
 FROM golang:1.22.4-alpine AS builder
-# 最新的 alpine 镜像没有一些工具，例如（`git` 和 `bash`）。
-# 将 git、bash 和 openssh 添加到镜像中
+
+# 添加必要的工具
 RUN apk add --no-cache git make bash ca-certificates tzdata
 
-# 镜像设置必要的环境变量
-# 工作目录名称 app
-
+# 设置环境变量
 ENV PROJECT_DIR=/app \
+    BINARY_NAME=meow_backend_artifact \
     GO111MODULE=on \
     CGO_ENABLED=0 \
     GOOS=linux \
@@ -15,37 +14,49 @@ ENV PROJECT_DIR=/app \
     TZ=Asia/Shanghai \
     APP_ENV=docker
 
-# 移动到工作目录
+# 创建并设置工作目录
 RUN mkdir -p ${PROJECT_DIR}
-
-# 设置工作目录# 使用官方的 Go 镜像作为基础镜像
 WORKDIR ${PROJECT_DIR}
 
-# 复制项目中的 go.mod 和 go.sum文件并下载依赖信息
+# 复制依赖文件并下载依赖
 COPY go.mod go.sum ./
-# 下载依赖
 RUN go mod download
 
-# 复制项目的源代码
+# 复制源代码
 COPY . .
+
+# 确认 Makefile 的内容
+RUN cat Makefile
 
 # 编译应用
 RUN make build
-#RUN go build -o main .
 
-# 使用轻量级的 alpine 镜像作为运行环境,这里因为国内网络问题，使用阿里云的镜像
+
+# 确保构建产物存在
+RUN ls -l ${PROJECT_DIR}/${BINARY_NAME}
+
+# 第二阶段：运行环境
 FROM alpine:latest
 
-# 安装 curl 用于健康检查
-RUN apk --no-cache add curl
+# 添加必要的工具
+RUN apk add --no-cache git make bash ca-certificates tzdata curl
 
-WORKDIR /root/
+# 设置二进制文件名称
+ENV BINARY_NAME=meow_backend_artifact
 
 # 从 builder 阶段复制编译好的二进制文件
-COPY --from=builder /app/main .
+COPY --from=builder /app/${BINARY_NAME} /bin/${BINARY_NAME}
+
+# 设置工作目录为 /bin
+WORKDIR /bin
+
+# 确保文件被正确复制并设置执行权限
+RUN ls -la /bin && \
+    file /bin/${BINARY_NAME} && \
+    chmod +x /bin/${BINARY_NAME}
 
 # 暴露应用端口
 EXPOSE 8080
 
 # 运行应用
-CMD ["./main"]
+CMD ["/bin/sh", "-c", "echo Binary name is: ${BINARY_NAME} && ls -l /bin/${BINARY_NAME} && exec /bin/${BINARY_NAME}"]

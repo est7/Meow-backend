@@ -1,0 +1,49 @@
+Name: meow-backend
+Version: 1.0.0
+Port: :8080
+PprofPort: :5555
+Mode: debug                 # debug, release, test
+CookieName: jwt-token
+SSL: true
+CtxDefaultTimeout: 12
+CSRF: true
+Debug: false
+EnableTrace: false
+EnablePprof: true
+
+DB:
+  Driver: postgres               # 驱动名称
+  Name: meow_app                 # 数据库名称
+  Host: pg
+  Port: 5432
+  UserName: postgres
+  Password: password
+  ShowLog: true                   # 是否打印所有SQL日志
+  MaxIdleConn: 10                 # 最大闲置的连接数，0意味着使用默认的大小2， 小于0表示不使用连接池
+  MaxOpenConn: 60                 # 最大打开的连接数, 需要小于数据库配置中的max_connections数
+  Timeout: 3                      # 数据库连接超时时间, 如果是 PostgreSQL 不需要加入单位
+  ReadTimeout: 3000               # 数据库去读超时时间, 0代表不限制，如果是PostgreSQL, 3000代表3s
+  ConnMaxLifeTime: 4h             # 单个连接最大存活时间，建议设置比数据库超时时长(wait_timeout)稍小一些
+  SlowThreshold: 500ms            # 慢查询阈值，设置后只打印慢查询日志，默认为200ms
+
+Redis:
+  Host: redis
+  Port: 6379
+  Password: ""
+  DB: 0
+  MinIdleConn: 200
+  DialTimeout: 60s
+  ReadTimeout: 500ms
+  WriteTimeout: 500ms
+  PoolSize: 100
+  PoolTimeout: 240s
+  EnableTrace: true
+
+Jwt:
+  JwtSecret: JWT_SECRET
+  JwtTimeout: 86400
+
+OTel:
+  Endpoint: totototodododo
+  Insecure: true
+

@@ -1,7 +1,18 @@
 # Makefile
+# init environment variables
+export PATH        := $(shell go env GOPATH)/bin:$(PATH)
+export GOPATH      := $(shell go env GOPATH)
+export GO111MODULE := on
+
+print-env:
+	@echo "PATH: $(PATH)"
+	@echo "GOROOT: $(GOROOT)"
+	@echo "GOPATH: $(GOPATH)"
+	@which go
+	@go version
 
 # 定义变量
-BINARY_NAME=meow_app
+BINARY_NAME=meow_backend_artifact
 DOCKER_COMPOSE=docker-compose
 
 # 默认目标
@@ -50,6 +61,16 @@ logs:
 	@echo "Showing logs..."
 	@$(DOCKER_COMPOSE) logs -f
 
+
+IMAGE_NAME = your_image_name
+CONTAINER_NAME = your_container_name
+
+clean:
+	@echo "Cleaning up..."
+	-docker stop $(CONTAINER_NAME)
+	-docker rm $(CONTAINER_NAME)
+	-docker rmi $(IMAGE_NAME)
+
 # 帮助信息
 help:
 	@echo "Available commands:"
@@ -63,4 +84,4 @@ help:
 	@echo "  make down       - Stop services"
 	@echo "  make logs       - Show service logs"
 
-.PHONY: all build run clean test docker-build docker-run up down logs help
+.PHONY: all build run clean test docker-build docker-run up down logs help clean

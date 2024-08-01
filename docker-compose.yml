@@ -19,13 +19,6 @@ services: # 定义一组服务
       - "8080:8080" # 将宿主机的 8080 端口映射到容器的 8080 端口
     environment: # 定义环境变量
       APP_ENV: docker
-      DB_HOST: pg
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: password
-      DB_NAME: meow_app
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
     networks:
       - backend # 连接到 backend 网络
     healthcheck: # 健康检查配置
@@ -46,9 +39,10 @@ services: # 定义一组服务
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: meow_app
+      POSTGRES_HOST_AUTH_METHOD: trust
       TZ: Asia/Shanghai # 设置时区
     healthcheck: # 健康检查配置
-      test: [ "CMD", "pg_isready", "-U", "test_user", "-d", "meow_app" ] # 用于健康检查的命令
+      test: [ "CMD", "pg_isready", "-U", "test_user", "-d", "meow_user" ] # 用于健康检查的命令
       timeout: 20s # 命令超时时间
       retries: 10 # 最大重试次数
       start_period: 40s # 容器启动后等待时间再开始健康检查
@@ -81,7 +75,7 @@ services: # 定义一组服务
     expose:
       - "6379" # 仅在内部网络中暴露端口
     volumes:
-      - redis_data:/data
+      - redis_data:/var/lib/redis
     networks:
       - backend # 连接到 backend 网络
 
