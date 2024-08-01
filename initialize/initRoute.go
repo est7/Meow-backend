@@ -24,18 +24,18 @@ func helloWorld(c *gin.Context) {
 // healthCheck 处理健康检查请求
 func healthCheck(c *gin.Context) {
 	// 检查数据库连接
-	err := AppInstance{hhh}.Ping()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Database connection failed"})
-		return
-	}
-
-	// 检查 Redis 连接
-	_, err = rdb.Ping(c).Result()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Redis connection failed"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"status": "ok", "message": "Service is healthy"})
+	//err := AppInstance{hhh}.Ping()
+	//if err != nil {
+	//	c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Database connection failed"})
+	//	return
+	//}
+	//
+	//// 检查 Redis 连接
+	//_, err = rdb.Ping(c).Result()
+	//if err != nil {
+	//	c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Redis connection failed"})
+	//	return
+	//}
+	//
+	//c.JSON(http.StatusOK, gin.H{"status": "ok", "message": "Service is healthy"})
 }

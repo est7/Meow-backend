@@ -65,8 +65,8 @@ logs:
 IMAGE_NAME = your_image_name
 CONTAINER_NAME = your_container_name
 
-clean:
-	@echo "Cleaning up..."
+clean-image:
+	@echo "clean build docker-build."
 	-docker stop $(CONTAINER_NAME)
 	-docker rm $(CONTAINER_NAME)
 	-docker rmi $(IMAGE_NAME)
@@ -83,5 +83,7 @@ help:
 	@echo "  make up         - Start services with Docker Compose"
 	@echo "  make down       - Stop services"
 	@echo "  make logs       - Show service logs"
+	@echo "  make clean-image - Clean build docker-build"
 
-.PHONY: all build run clean test docker-build docker-run up down logs help clean
+
+.PHONY: all build run clean test docker-build docker-run up down logs help clean-image

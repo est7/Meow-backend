@@ -45,6 +45,6 @@ func InitDB(dbConfig PGConfig, ctx context.Context) (*sql.DB, error) {
 	return db, nil
 }
 
-func CloseDB(db *sql.DB) {
-	db.Close()
+func CloseDB(db *sql.DB) error {
+	return db.Close()
 }

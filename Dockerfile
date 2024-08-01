@@ -23,6 +23,7 @@ RUN go mod download
 
 # 复制源代码
 COPY . .
+COPY config ./config
 
 # 确认 Makefile 的内容
 RUN cat Makefile
@@ -44,7 +45,7 @@ ENV BINARY_NAME=meow_backend_artifact
 
 # 从 builder 阶段复制编译好的二进制文件
 COPY --from=builder /app/${BINARY_NAME} /bin/${BINARY_NAME}
-
+COPY --from=builder /app/config /bin/config
 # 设置工作目录为 /bin
 WORKDIR /bin
 
