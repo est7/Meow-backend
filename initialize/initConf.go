@@ -13,7 +13,10 @@ type Mode string
 
 var (
 	envConfig AppEnvConfig
-	Instance  *AppInstance
+	Instance  *AppInstance = &AppInstance{
+		Db:          nil,
+		RedisClient: nil,
+	}
 )
 
 type AppInstance struct {

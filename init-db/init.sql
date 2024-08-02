@@ -1,4 +1,4 @@
-/*-- 注意：postgres 用户通常已经存在，是默认的超级用户
+-- 注意：postgres 用户通常已经存在，是默认的超级用户
 -- 如果 postgres 用户不存在，可以取消下面这行的注释
 -- CREATE USER postgres WITH SUPERUSER PASSWORD 'strong_password_for_postgres';
 
@@ -80,4 +80,4 @@ VALUES ('test_user1', 'user1@example.com', 'hashed_password_1'),
 
 -- 验证数据（可选）
 SELECT *
-FROM users;*/
+FROM users;

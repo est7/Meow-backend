@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 type PGConfig struct {
@@ -38,7 +39,8 @@ func InitDB(dbConfig PGConfig, ctx context.Context) (*sql.DB, error) {
 
 	// 测试数据库连接
 	if err := db.PingContext(ctx); err != nil {
-		db.Close() // 关闭连接
+		log.Printf("PingContext failed: %v", err)
+		_ = db.Close()
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 

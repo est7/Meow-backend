@@ -29,6 +29,7 @@ func main() {
 		log.Fatalf("Error initializing database: %v", err)
 	}
 	initialize.Instance.Db = db
+
 	defer func(client *sql.DB) {
 		err := initialize.CloseDB(client)
 		if err != nil {

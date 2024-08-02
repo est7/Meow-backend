@@ -14,7 +14,7 @@ EnablePprof: true
 DB:
   Driver: postgres               # 驱动名称
   Name: meow_app                 # 数据库名称
-  Host: pg
+  Host: host.docker.internal
   Port: 5432
   UserName: postgres
   Password: password
