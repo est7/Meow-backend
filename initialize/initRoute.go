@@ -1,6 +1,7 @@
 package initialize
 
 import (
+	"Meow-backend/pkg/middleware"
 	"context"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -8,13 +9,17 @@ import (
 
 func InitRoute(ctx context.Context) (*gin.Engine, error) {
 	// 设置 Gin 路由
-	r := gin.Default()
+	server := gin.Default()
+	// 遍历并将每个中间件添加到 Gin 服务器
+	for _, middleware := range middleware.Middleware {
+		server.Use(middleware)
+	}
 
 	// 定义路由
-	r.GET("/", helloWorld)
-	r.GET("/health", healthCheck)
+	server.GET("/", helloWorld)
+	server.GET("/health", healthCheck)
 
-	return r, nil
+	return server, nil
 }
 
 func helloWorld(c *gin.Context) {

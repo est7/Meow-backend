@@ -1,11 +1,13 @@
 package initialize
 
 import (
+	logger "Meow-backend/pkg/log"
 	"database/sql"
 	"errors"
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	viper2 "github.com/spf13/viper"
+	"gorm.io/gorm"
 	"log"
 )
 
@@ -15,12 +17,14 @@ var (
 	envConfig AppEnvConfig
 	Instance  *AppInstance = &AppInstance{
 		Db:          nil,
+		GormDb:      nil,
 		RedisClient: nil,
 	}
 )
 
 type AppInstance struct {
 	Db          *sql.DB
+	GormDb      *gorm.DB
 	RedisClient *redis.Client
 }
 type AppEnvConfig struct {
@@ -58,6 +62,8 @@ type OTelConfig struct {
 	Insecure bool   `mapstructure:"Insecure"`
 }
 
+var ConfigPath = "config/"
+
 func LoadConfig(path string) AppEnvConfig {
 	// 从环境变量中获取配置
 	viper := viper2.GetViper()
@@ -84,6 +90,47 @@ func LoadConfig(path string) AppEnvConfig {
 	fmt.Printf("Loaded config: %+v\n", envConfig)
 
 	return envConfig
+}
+
+var (
+	Logg logger.Logger
+)
+
+func LoadLoggerConfig(path string) logger.Logger {
+	// 从环境变量中获取配置
+	viper := viper2.GetViper()
+	viper.AddConfigPath(path)
+	viper.SetConfigName("logger")
+	viper.SetConfigType("yaml")
+	viper.AutomaticEnv()
+
+	var err error
+	if err = viper.ReadInConfig(); err != nil {
+		var configFileNotFoundError viper2.ConfigFileNotFoundError
+
+		if errors.As(err, &configFileNotFoundError) {
+			log.Fatalf("Config file not found: %v", err)
+		} else {
+			log.Fatalf("Error reading config file: %s", err)
+		}
+	}
+
+	// 将配置文件映射到结构体
+	var loggerConfig logger.LoggerConfig
+	if err = viper.Unmarshal(&loggerConfig); err != nil {
+		log.Fatalf("Unable to decode into struct: %v", err)
+	}
+
+	fmt.Printf("Loaded config: %+v\n", loggerConfig)
+
+	zapLogger := initZapLogger(&loggerConfig)
+
+	Logg = zapLogger
+	return zapLogger
+}
+
+func initZapLogger(cfg *logger.LoggerConfig) logger.Logger {
+	return logger.InitZapLogger(cfg)
 }
 
 /**

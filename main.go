@@ -15,20 +15,21 @@ import (
 	"log"
 )
 
-var path = "config/"
-
 func main() {
 	ctx := context.Background()
 
 	// Load config
-	conf := initialize.LoadConfig(path)
+	conf := initialize.LoadConfig(initialize.ConfigPath)
+	Logg = initialize.LoadLoggerConfig(initialize.ConfigPath)
+	Logg.Debugf("success initialize config: %+v", conf)
 
 	// Initialize database
-	db, err := initialize.InitDB(conf.PGConfig, ctx)
+	gormDB, db, err := initialize.InitDB(conf.PGConfig, ctx)
 	if err != nil {
-		log.Fatalf("Error initializing database: %v", err)
+		Logg.Fatalf("Error initializing database: %v", err)
 	}
 	initialize.Instance.Db = db
+	initialize.Instance.GormDb = gormDB
 
 	defer func(client *sql.DB) {
 		err := initialize.CloseDB(client)
