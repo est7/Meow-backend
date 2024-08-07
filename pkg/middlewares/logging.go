@@ -1,8 +1,9 @@
-package middleware
+package middlewares
 
 import (
 	"Meow-backend/pkg/app"
 	"Meow-backend/pkg/errcode"
+	"Meow-backend/pkg/log"
 	"bytes"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
@@ -66,7 +67,7 @@ func Logging() gin.HandlerFunc {
 		// get code and message
 		var response app.Response
 		if err := json.Unmarshal(blw.body.Bytes(), &response); err != nil {
-			Logg.Errorf("response body can not unmarshal to model.Response struct, body: `%s`, err: %+v",
+			log.Errorf("response body can not unmarshal to model.Response struct, body: `%s`, err: %+v",
 				blw.body.Bytes(), err)
 			code = errcode.ErrInternalServer.Code()
 			message = err.Error()

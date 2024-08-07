@@ -35,9 +35,10 @@ func NewError(code int, message string, cause error) *Error {
 func NewCustomError(code int, message string) *CustomError {
 	mu.Lock()
 	defer mu.Unlock()
-	if _, ok := errorCodes[code]; ok {
-		panic(fmt.Sprintf("code %d already exists, please use a different one", code))
-	}
+	// fixme 这里并不需要一一对应，因为有些 Custom Error的错误对应到 Http Status Code 中只是一个 401
+	//if _, ok := errorCodes[code]; ok {
+	//	panic(fmt.Sprintf("code %d already exists, please use a different one", code))
+	//}
 	errorCodes[code] = struct{}{}
 	return &CustomError{code: code, message: message}
 }

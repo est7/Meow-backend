@@ -92,10 +92,6 @@ func LoadConfig(path string) AppEnvConfig {
 	return envConfig
 }
 
-var (
-	Logg logger.Logger
-)
-
 func LoadLoggerConfig(path string) logger.Logger {
 	// 从环境变量中获取配置
 	viper := viper2.GetViper()
@@ -125,7 +121,6 @@ func LoadLoggerConfig(path string) logger.Logger {
 
 	zapLogger := initZapLogger(&loggerConfig)
 
-	Logg = zapLogger
 	return zapLogger
 }
 

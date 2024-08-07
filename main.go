@@ -2,6 +2,7 @@ package main
 
 import (
 	"Meow-backend/initialize"
+	"Meow-backend/pkg/log"
 	"context"
 	"database/sql"
 	_ "github.com/gin-contrib/cors"
@@ -12,7 +13,6 @@ import (
 	_ "github.com/swaggo/gin-swagger"
 	_ "github.com/swaggo/swag"
 	_ "github.com/thanhpk/randstr"
-	"log"
 )
 
 func main() {
@@ -20,13 +20,14 @@ func main() {
 
 	// Load config
 	conf := initialize.LoadConfig(initialize.ConfigPath)
-	Logg = initialize.LoadLoggerConfig(initialize.ConfigPath)
-	Logg.Debugf("success initialize config: %+v", conf)
+	initialize.LoadLoggerConfig(initialize.ConfigPath)
+
+	log.Debugf("success initialize logg")
 
 	// Initialize database
 	gormDB, db, err := initialize.InitDB(conf.PGConfig, ctx)
 	if err != nil {
-		Logg.Fatalf("Error initializing database: %v", err)
+		log.Fatalf("Error initializing database: %v", err)
 	}
 	initialize.Instance.Db = db
 	initialize.Instance.GormDb = gormDB
@@ -59,7 +60,7 @@ func main() {
 	}
 
 	// Start the server
-	log.Printf("Server started on port %s", conf.Port)
+	log.Infof("Server started on port %s", conf.Port)
 	if err := r.Run(conf.Port); err != nil {
 		log.Fatalf("Error running server: %v", err)
 	}
