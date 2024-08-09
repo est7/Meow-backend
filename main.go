@@ -4,10 +4,8 @@ import (
 	"Meow-backend/initialize"
 	"Meow-backend/pkg/log"
 	"context"
-	"database/sql"
 	_ "github.com/gin-contrib/cors"
 	_ "github.com/lib/pq"
-	"github.com/redis/go-redis/v9"
 	_ "github.com/redis/go-redis/v9"
 	_ "github.com/swaggo/files"
 	_ "github.com/swaggo/gin-swagger"
@@ -32,12 +30,11 @@ func main() {
 	initialize.Instance.Db = db
 	initialize.Instance.GormDb = gormDB
 
-	defer func(client *sql.DB) {
-		err := initialize.CloseDB(client)
-		if err != nil {
+	defer func() {
+		if err := initialize.CloseDB(db); err != nil {
 			log.Fatalf("Error closing database: %v", err)
 		}
-	}(db)
+	}()
 
 	// Initialize Redis
 	redisClient, err := initialize.InitRedis(conf.RedisConfig, ctx)
@@ -46,12 +43,11 @@ func main() {
 	}
 	initialize.Instance.RedisClient = redisClient
 
-	defer func(db *redis.Client) {
-		err := initialize.CloseRedis(redisClient)
-		if err != nil {
+	defer func() {
+		if err := initialize.CloseRedis(redisClient); err != nil {
 			log.Fatalf("Error closing Redis: %v", err)
 		}
-	}(redisClient)
+	}()
 
 	// Initialize route
 	r, err := initialize.InitRoute(ctx)
