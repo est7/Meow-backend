@@ -104,6 +104,8 @@ func initToStatus() {
 		ErrInternalServer.Code():     http.StatusInternalServerError,
 		ErrNotFound.Code():           http.StatusNotFound,
 		ErrInvalidParam.Code():       http.StatusBadRequest,
+		ErrNotFound.Code():           http.StatusNotFound,
+		ErrApiNotFound.Code():        http.StatusNotFound,
 		ErrToken.Code():              http.StatusUnauthorized,
 		ErrInvalidToken.Code():       http.StatusUnauthorized,
 		ErrTokenTimeout.Code():       http.StatusUnauthorized,

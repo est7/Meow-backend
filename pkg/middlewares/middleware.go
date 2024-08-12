@@ -18,6 +18,7 @@ func defaultMiddlewares() map[string]gin.HandlerFunc {
 		"logger":     Logging(),
 		"cors":       Cors(),
 		"request_id": RequestID(),
+		"timeout":    Timeout(5 * time.Second),
 	}
 }
 

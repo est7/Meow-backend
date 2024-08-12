@@ -12,9 +12,6 @@ services: # 定义一组服务
     depends_on: # 定义依赖关系，确保这些服务在该服务之前启动
       - pg
       - redis
-    links: # 连接到另一个容器，- 服务名称 [:]
-      - pg
-      - redis
     ports:
       - "8080:8080" # 将宿主机的 8080 端口映射到容器的 8080 端口
     environment: # 定义环境变量

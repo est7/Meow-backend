@@ -105,9 +105,9 @@ type HealthCheckResponse struct {
 	Hostname string `json:"hostname"`
 }
 
-// HealthCheck performs a health check
-func HealthCheck(c *gin.Context) {
-	c.JSON(http.StatusOK, HealthCheckResponse{
+// HostnameHealthCheck performs a health check
+func HostnameHealthCheck(c *gin.Context) {
+	SuccessResponse(c, HealthCheckResponse{
 		Status:   "UP",
 		Hostname: utils.GetHostname(),
 	})
