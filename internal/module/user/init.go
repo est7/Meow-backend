@@ -1,6 +1,9 @@
 package user
 
-import "github.com/gin-gonic/gin"
+import (
+	"Meow-backend/pkg/log"
+	"github.com/gin-gonic/gin"
+)
 
 type ModuleUser struct{}
 
@@ -8,7 +11,10 @@ func (u *ModuleUser) GetName() string {
 	return "User"
 }
 
-func (u *ModuleUser) Init() {}
+func (u *ModuleUser) Init() {
+	log.Info("init user module")
+	u.GetName()
+}
 
 func (u *ModuleUser) InitRouter(rgPublic *gin.RouterGroup, rgPrivate *gin.RouterGroup) {
 	// 认证相关路由

@@ -6,6 +6,7 @@ type LoggerConfig struct {
 	DisableCaller     bool
 	DisableStacktrace bool
 	Encoding          string
+	OutputPaths       []string
 	Level             string
 	ServiceName       string // service name
 	Filename          string

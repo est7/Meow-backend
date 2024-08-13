@@ -1,5 +1,6 @@
 Development: false
 DisableCaller: false
+OutputPaths: [ "stdout", "/var/log/test.log" ] # 日志输出路径
 DisableStacktrace: false
 Encoding: json # json or console
 Level: info # 日志级别，INFO, WARN, ERROR

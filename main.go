@@ -2,62 +2,85 @@ package main
 
 import (
 	"Meow-backend/initialize"
+	"Meow-backend/internal/module"
 	"Meow-backend/pkg/log"
 	"context"
+	"database/sql"
 	_ "github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	"github.com/redis/go-redis/v9"
 	_ "github.com/redis/go-redis/v9"
 	_ "github.com/swaggo/files"
 	_ "github.com/swaggo/gin-swagger"
 	_ "github.com/swaggo/swag"
 	_ "github.com/thanhpk/randstr"
+	"gorm.io/gorm"
 )
 
 func main() {
 	ctx := context.Background()
+	conf := initConfig()
+	initModules()
 
-	// Load config
+	db, gormDB := initDatabase(ctx, conf)
+	// nolint:unused
+	_ = gormDB
+
+	defer initialize.CloseDB(db)
+
+	redisClient := initRedis(ctx, conf)
+	defer initialize.CloseRedis(redisClient)
+
+	r := initRouter(ctx)
+
+	startServer(r, conf.Port)
+}
+
+func initConfig() *initialize.AppEnvConfig {
 	conf := initialize.LoadConfig(initialize.ConfigPath)
-	initialize.LoadLoggerConfig(initialize.ConfigPath)
+	initialize.LoadLoggerConfig(initialize.ConfigPath, conf.Mode)
+	log.Debugf("success initialize log")
+	return &conf
+}
 
-	log.Debugf("success initialize logg")
+func initModules() {
+	for _, m := range module.Modules {
+		m.Init()
+	}
+}
 
-	// Initialize database
+func initDatabase(ctx context.Context, conf *initialize.AppEnvConfig) (*sql.DB, *gorm.DB) {
 	gormDB, db, err := initialize.InitDB(conf.PGConfig, ctx)
 	if err != nil {
 		log.Fatalf("Error initializing database: %v", err)
 	}
 	initialize.Instance.Db = db
 	initialize.Instance.GormDb = gormDB
+	return db, gormDB
+}
 
-	defer func() {
-		if err := initialize.CloseDB(db); err != nil {
-			log.Fatalf("Error closing database: %v", err)
-		}
-	}()
-
-	// Initialize Redis
+func initRedis(ctx context.Context, conf *initialize.AppEnvConfig) *redis.Client {
 	redisClient, err := initialize.InitRedis(conf.RedisConfig, ctx)
 	if err != nil {
 		log.Fatalf("Error initializing Redis: %v", err)
 	}
 	initialize.Instance.RedisClient = redisClient
+	return redisClient
+}
 
-	defer func() {
-		if err := initialize.CloseRedis(redisClient); err != nil {
-			log.Fatalf("Error closing Redis: %v", err)
-		}
-	}()
-
-	// Initialize route
+func initRouter(ctx context.Context) *gin.Engine {
 	r, err := initialize.InitRoute(ctx)
 	if err != nil {
 		log.Fatalf("Error initializing route: %v", err)
 	}
+	return r
+}
 
-	// Start the server
-	log.Infof("Server started on port %s", conf.Port)
-	if err := r.Run(conf.Port); err != nil {
+func startServer(r *gin.Engine, port string) {
+	log.Infof("Server started on port %s", port)
+	if err := r.Run(port); err != nil {
+		panic(err)
 		log.Fatalf("Error running server: %v", err)
 	}
 }

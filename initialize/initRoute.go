@@ -13,6 +13,7 @@ import (
 
 func InitRoute(ctx context.Context) (*gin.Engine, error) {
 	// 设置 Gin 路由
+	gin.SetMode(gin.ReleaseMode)
 	server := gin.Default()
 	// 遍历并将每个中间件添加到 Gin 服务器
 	for _, middleware := range middlewares.Middleware {
@@ -36,10 +37,8 @@ func InitRoute(ctx context.Context) (*gin.Engine, error) {
 	server.GET("/hostname", app.HostnameHealthCheck)
 
 	apiV1Pub := server.Group("/v1")
-
 	apiV1Pri := server.Group("/v1")
-	apiV1Pri.Use(middlewares.JWT())
-
+	apiV1Pri.Use(middlewares.Auth())
 	for _, m := range module.Modules {
 		m.InitRouter(apiV1Pub, apiV1Pri)
 	}

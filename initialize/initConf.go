@@ -14,7 +14,7 @@ import (
 type Mode string
 
 var (
-	envConfig AppEnvConfig
+	EnvConfig AppEnvConfig
 	Instance  *AppInstance = &AppInstance{
 		Db:          nil,
 		GormDb:      nil,
@@ -83,16 +83,16 @@ func LoadConfig(path string) AppEnvConfig {
 	}
 
 	// 将配置文件映射到结构体
-	if err := viper.Unmarshal(&envConfig); err != nil {
+	if err := viper.Unmarshal(&EnvConfig); err != nil {
 		log.Fatalf("Unable to decode into struct: %v", err)
 	}
 
-	fmt.Printf("Loaded config: %+v\n", envConfig)
+	fmt.Printf("Loaded config: %+v\n", EnvConfig)
 
-	return envConfig
+	return EnvConfig
 }
 
-func LoadLoggerConfig(path string) logger.Logger {
+func LoadLoggerConfig(path string, mode Mode) logger.Logger {
 	// 从环境变量中获取配置
 	viper := viper2.GetViper()
 	viper.AddConfigPath(path)
@@ -119,13 +119,13 @@ func LoadLoggerConfig(path string) logger.Logger {
 
 	fmt.Printf("Loaded config: %+v\n", loggerConfig)
 
-	zapLogger := initZapLogger(&loggerConfig)
+	zapLogger := initZapLogger(&loggerConfig, mode)
 
 	return zapLogger
 }
 
-func initZapLogger(cfg *logger.LoggerConfig) logger.Logger {
-	return logger.InitZapLogger(cfg)
+func initZapLogger(cfg *logger.LoggerConfig, mode Mode) logger.Logger {
+	return logger.InitZapLogger(cfg, mode)
 }
 
 /**

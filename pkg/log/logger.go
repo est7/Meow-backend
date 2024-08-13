@@ -1,6 +1,7 @@
 package log
 
 import (
+	"Meow-backend/initialize"
 	"context"
 	"fmt"
 	"go.opentelemetry.io/otel/trace"
@@ -37,18 +38,32 @@ type Logger interface {
 	WithFields(keyValues Fields) Logger
 }
 
-func InitZapLogger(cfg *LoggerConfig, opts ...Option) Logger {
+func InitZapLogger(cfg *LoggerConfig, mode initialize.Mode, opts ...Option) Logger {
 	var err error
-	// new zap logger
-	logger, err = newZapLogger(cfg, opts...)
-	if err != nil {
-		_ = fmt.Errorf("init newZapLogger err: %v", err)
+
+	switch mode {
+	case initialize.DebugMode:
+		cfg.Encoding = "console"
+		cfg.OutputPaths = []string{"stdout", "/var/log/debug.log"}
+	case initialize.TestMode:
+		cfg.Encoding = "console"
+		cfg.OutputPaths = []string{"stdout", "/var/log/test.log"}
+	case initialize.ReleaseMode:
+		cfg.Encoding = "json"
+		cfg.OutputPaths = []string{"stdout", "/var/log/release.log"}
+	default:
+		cfg.Encoding = "json"
+		cfg.OutputPaths = []string{"stdout", "/var/log/default.log"}
 	}
 
-	// log 用于支持模块级的方法调用，所以要比其他 Logger 多跳一层
+	logger, err = newZapLogger(cfg, opts...)
+	if err != nil {
+		panic(fmt.Sprintf("init newZapLogger err: %v", err))
+	}
+
 	log, err = newLoggerWithCallerSkip(cfg, 1, opts...)
 	if err != nil {
-		_ = fmt.Errorf("init newLogger err: %v", err)
+		panic(fmt.Sprintf("init newLoggerWithCallerSkip err: %v", err))
 	}
 
 	return log
