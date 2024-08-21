@@ -1,7 +1,7 @@
 package initialize
 
 import (
-	"Meow-backend/internal/module"
+	"Meow-backend/internal/modules"
 	"Meow-backend/pkg/app"
 	"Meow-backend/pkg/errcode"
 	"Meow-backend/pkg/middlewares"
@@ -39,7 +39,7 @@ func InitRoute(ctx context.Context) (*gin.Engine, error) {
 	apiV1Pub := server.Group("/v1")
 	apiV1Pri := server.Group("/v1")
 	apiV1Pri.Use(middlewares.Auth())
-	for _, m := range module.Modules {
+	for _, m := range modules.Modules {
 		m.InitRouter(apiV1Pub, apiV1Pri)
 	}
 

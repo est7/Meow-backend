@@ -2,7 +2,7 @@ package main
 
 import (
 	"Meow-backend/initialize"
-	"Meow-backend/internal/module"
+	"Meow-backend/internal/modules"
 	"Meow-backend/pkg/log"
 	"context"
 	"database/sql"
@@ -24,8 +24,7 @@ func main() {
 	initModules()
 
 	db, gormDB := initDatabase(ctx, conf)
-	// nolint:unused
-	_ = gormDB
+	gormDB.AutoMigrate()
 
 	defer initialize.CloseDB(db)
 
@@ -45,7 +44,7 @@ func initConfig() *initialize.AppEnvConfig {
 }
 
 func initModules() {
-	for _, m := range module.Modules {
+	for _, m := range modules.Modules {
 		m.Init()
 	}
 }

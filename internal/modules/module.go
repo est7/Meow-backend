@@ -1,13 +1,14 @@
-package module
+package modules
 
 import (
-	"Meow-backend/internal/module/card"
-	"Meow-backend/internal/module/feed"
-	"Meow-backend/internal/module/im"
-	"Meow-backend/internal/module/user"
+	"Meow-backend/internal/modules/v1/card"
+	"Meow-backend/internal/modules/v1/feed"
+	"Meow-backend/internal/modules/v1/im"
+	"Meow-backend/internal/modules/v1/user"
 	"github.com/gin-gonic/gin"
 )
 
+// Module : handler v1
 type Module interface {
 	GetName() string
 	Init()

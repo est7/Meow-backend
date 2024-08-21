@@ -39,6 +39,7 @@ func InitDB(dbConfig PGConfig, ctx context.Context) (*gorm.DB, *sql.DB, error) {
 		},
 		Logger: logger.Default.LogMode(logger.Info),
 	})
+
 	if err != nil {
 		log.Panicf("open db failed. Host: %s, database name: %s, err: %+v", dbConfig.Host, dbConfig.Name, err)
 	}
