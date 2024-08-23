@@ -11,7 +11,7 @@ import (
 	"net/http"
 )
 
-func InitRoute(ctx context.Context) (*gin.Engine, error) {
+func InitRoute(ctx context.Context, appCtx *AppInstance) (*gin.Engine, error) {
 	// 设置 Gin 路由
 	gin.SetMode(gin.ReleaseMode)
 	server := gin.Default()
@@ -24,11 +24,11 @@ func InitRoute(ctx context.Context) (*gin.Engine, error) {
 	LoadWebRouter(server)
 
 	server.NoRoute(func(c *gin.Context) {
-		app.Error(c, errcode.ErrApiNotFound)
+		app.ErrorResponse(c, errcode.ErrApiNotFound)
 	})
 
 	server.NoMethod(func(c *gin.Context) {
-		app.Error(c, errcode.ErrMethodNotAllowed)
+		app.ErrorResponse(c, errcode.ErrMethodNotAllowed)
 	})
 
 	// HealthCheck 健康检查路由
@@ -36,11 +36,9 @@ func InitRoute(ctx context.Context) (*gin.Engine, error) {
 	// hostnameHealthCheck 主机名健康检查路由
 	server.GET("/hostname", app.HostnameHealthCheck)
 
-	apiV1Pub := server.Group("/v1")
-	apiV1Pri := server.Group("/v1")
-	apiV1Pri.Use(middlewares.Auth())
-	for _, m := range modules.Modules {
-		m.InitRouter(apiV1Pub, apiV1Pri)
+	allModules := modules.InitModules(appCtx)
+	for _, module := range allModules {
+		module.RegisterRoutes(server, middlewares.CreateAuthMiddleware)
 	}
 
 	return server, nil
@@ -56,7 +54,7 @@ func healthCheck(c *gin.Context) {
 	details := make(map[string]string)
 
 	// 检查数据库连接
-	if err := Instance.Db.Ping(); err != nil {
+	if err := AppCtxInstance.Db.Ping(); err != nil {
 		status = "DOWN"
 		details["database"] = "Database connection failed: " + err.Error()
 	} else {
@@ -64,7 +62,7 @@ func healthCheck(c *gin.Context) {
 	}
 
 	// 检查 Redis 连接
-	if _, err := Instance.RedisClient.Ping(c).Result(); err != nil {
+	if _, err := AppCtxInstance.RedisClient.Ping(c).Result(); err != nil {
 		status = "DOWN"
 		details["redis"] = "Redis connection failed: " + err.Error()
 	} else {
@@ -80,6 +78,6 @@ func healthCheck(c *gin.Context) {
 	if status == "UP" {
 		app.SuccessResponse(c, healthData)
 	} else {
-		app.Error(c, errcode.NewCustomError(http.StatusServiceUnavailable, "Service is unhealthy"))
+		app.ErrorResponse(c, errcode.NewCustomError(http.StatusServiceUnavailable, "Service is unhealthy"))
 	}
 }

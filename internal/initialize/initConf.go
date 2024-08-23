@@ -14,8 +14,8 @@ import (
 type Mode string
 
 var (
-	EnvConfig AppEnvConfig
-	Instance  *AppInstance = &AppInstance{
+	EnvConfig      AppEnvConfig
+	AppCtxInstance *AppInstance = &AppInstance{
 		Db:          nil,
 		GormDb:      nil,
 		RedisClient: nil,

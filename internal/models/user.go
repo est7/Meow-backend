@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type User struct {
+type UserBaseModel struct {
 	ID           uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:uuid_generate_v4()"`
 	Username     string    `json:"username" gorm:"type:varchar(255);not null;unique"`
 	Email        string    `json:"email" gorm:"type:varchar(255);unique"`

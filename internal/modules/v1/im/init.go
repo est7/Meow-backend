@@ -1,15 +1,29 @@
 package im
 
-import "github.com/gin-gonic/gin"
+import (
+	"Meow-backend/internal/initialize"
+	"Meow-backend/internal/modules"
+	"Meow-backend/pkg/auth"
+	"Meow-backend/pkg/log"
+	"github.com/gin-gonic/gin"
+)
 
-type ModuleIm struct{}
-
-func (u *ModuleIm) GetName() string {
-	return "Im"
+type IMModule struct {
+	appCtx *initialize.AppInstance
 }
 
-func (u *ModuleIm) Init() {}
+func NewIMModule(appCtx *initialize.AppInstance) modules.Module {
+	return &IMModule{appCtx: appCtx}
+}
 
-func (u *ModuleIm) InitRouter(rgPublic *gin.RouterGroup, rgPrivate *gin.RouterGroup) {
+func (u *IMModule) Name() string {
+	return "IM"
+}
 
+func (u *IMModule) Init(appCtx *initialize.AppInstance) {
+	u.appCtx = appCtx
+	log.Info("Initializing im module")
+}
+
+func (u *IMModule) RegisterRoutes(r *gin.Engine, authMiddleware func(auth.PermissionLevel) gin.HandlerFunc) {
 }

@@ -1,32 +1,29 @@
 package modules
 
 import (
-	"Meow-backend/internal/modules/v1/card"
-	"Meow-backend/internal/modules/v1/feed"
-	"Meow-backend/internal/modules/v1/im"
-	"Meow-backend/internal/modules/v1/user"
+	"Meow-backend/internal/initialize"
+	"Meow-backend/pkg/auth"
 	"github.com/gin-gonic/gin"
 )
 
-// Module : handler v1
 type Module interface {
-	GetName() string
-	Init()
-	InitRouter(rgPublic *gin.RouterGroup, rgPrivate *gin.RouterGroup)
+	Name() string
+	Init(appCtx *initialize.AppInstance)
+	RegisterRoutes(*gin.Engine, func(auth.PermissionLevel) gin.HandlerFunc)
 }
 
-var Modules []Module
+var moduleFactories []func(*initialize.AppInstance) Module
 
-func registerModule(m []Module) {
-	Modules = append(Modules, m...)
+func RegisterModuleFactory(factory func(*initialize.AppInstance) Module) {
+	moduleFactories = append(moduleFactories, factory)
 }
 
-func init() {
-	// Register module here
-	registerModule([]Module{
-		&user.ModuleUser{},
-		&feed.ModuleFeed{},
-		&card.ModuleCard{},
-		&im.ModuleIm{},
-	})
+func InitModules(ctx *initialize.AppInstance) []Module {
+	modules := make([]Module, 0, len(moduleFactories))
+	for _, factory := range moduleFactories {
+		module := factory(ctx)
+		module.Init(ctx)
+		modules = append(modules, module)
+	}
+	return modules
 }

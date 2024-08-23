@@ -1,8 +1,12 @@
 package main
 
 import (
-	"Meow-backend/initialize"
+	"Meow-backend/internal/initialize"
 	"Meow-backend/internal/modules"
+	"Meow-backend/internal/modules/v1/card"
+	"Meow-backend/internal/modules/v1/feed"
+	"Meow-backend/internal/modules/v1/im"
+	"Meow-backend/internal/modules/v1/user"
 	"Meow-backend/pkg/log"
 	"context"
 	"database/sql"
@@ -21,7 +25,6 @@ import (
 func main() {
 	ctx := context.Background()
 	conf := initConfig()
-	initModules()
 
 	db, gormDB := initDatabase(ctx, conf)
 	gormDB.AutoMigrate()
@@ -31,7 +34,9 @@ func main() {
 	redisClient := initRedis(ctx, conf)
 	defer initialize.CloseRedis(redisClient)
 
-	r := initRouter(ctx)
+	var appCtxInstance = initialize.AppCtxInstance
+
+	r := initRouter(ctx, appCtxInstance)
 
 	startServer(r, conf.Port)
 }
@@ -43,10 +48,11 @@ func initConfig() *initialize.AppEnvConfig {
 	return &conf
 }
 
-func initModules() {
-	for _, m := range modules.Modules {
-		m.Init()
-	}
+func registerModule() {
+	modules.RegisterModuleFactory(user.NewUserModule)
+	modules.RegisterModuleFactory(feed.NewFeedModule)
+	modules.RegisterModuleFactory(card.NewCardModule)
+	modules.RegisterModuleFactory(im.NewIMModule)
 }
 
 func initDatabase(ctx context.Context, conf *initialize.AppEnvConfig) (*sql.DB, *gorm.DB) {
@@ -54,8 +60,8 @@ func initDatabase(ctx context.Context, conf *initialize.AppEnvConfig) (*sql.DB, 
 	if err != nil {
 		log.Fatalf("Error initializing database: %v", err)
 	}
-	initialize.Instance.Db = db
-	initialize.Instance.GormDb = gormDB
+	initialize.AppCtxInstance.Db = db
+	initialize.AppCtxInstance.GormDb = gormDB
 	return db, gormDB
 }
 
@@ -64,15 +70,16 @@ func initRedis(ctx context.Context, conf *initialize.AppEnvConfig) *redis.Client
 	if err != nil {
 		log.Fatalf("Error initializing Redis: %v", err)
 	}
-	initialize.Instance.RedisClient = redisClient
+	initialize.AppCtxInstance.RedisClient = redisClient
 	return redisClient
 }
 
-func initRouter(ctx context.Context) *gin.Engine {
-	r, err := initialize.InitRoute(ctx)
+func initRouter(ctx context.Context, appCtx *initialize.AppInstance) *gin.Engine {
+	r, err := initialize.InitRoute(ctx, appCtx)
 	if err != nil {
 		log.Fatalf("Error initializing route: %v", err)
 	}
+
 	return r
 }
 
@@ -82,4 +89,8 @@ func startServer(r *gin.Engine, port string) {
 		panic(err)
 		log.Fatalf("Error running server: %v", err)
 	}
+}
+
+func init() {
+	registerModule()
 }

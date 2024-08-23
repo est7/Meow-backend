@@ -1,15 +1,29 @@
 package feed
 
-import "github.com/gin-gonic/gin"
+import (
+	"Meow-backend/internal/initialize"
+	"Meow-backend/internal/modules"
+	"Meow-backend/pkg/auth"
+	"Meow-backend/pkg/log"
+	"github.com/gin-gonic/gin"
+)
 
-type ModuleFeed struct{}
+type FeedModule struct {
+	appCtx *initialize.AppInstance
+}
 
-func (u *ModuleFeed) GetName() string {
+func NewFeedModule(appCtx *initialize.AppInstance) modules.Module {
+	return &FeedModule{appCtx: appCtx}
+}
+
+func (u *FeedModule) Name() string {
 	return "Feed"
 }
 
-func (u *ModuleFeed) Init() {}
+func (u *FeedModule) Init(appCtx *initialize.AppInstance) {
+	u.appCtx = appCtx
+	log.Info("Initializing feed module")
+}
 
-func (u *ModuleFeed) InitRouter(rgPublic *gin.RouterGroup, rgPrivate *gin.RouterGroup) {
-
+func (u *FeedModule) RegisterRoutes(r *gin.Engine, authMiddleware func(auth.PermissionLevel) gin.HandlerFunc) {
 }

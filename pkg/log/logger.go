@@ -1,7 +1,7 @@
 package log
 
 import (
-	"Meow-backend/initialize"
+	"Meow-backend/internal/initialize"
 	"context"
 	"fmt"
 	"go.opentelemetry.io/otel/trace"

@@ -37,8 +37,49 @@ func SuccessResponse(c *gin.Context, data interface{}) {
 	})
 }
 
+func SuccessResponseWithDetailed(c *gin.Context, data interface{}, detailMsg []string) {
+	if data == nil {
+		data = gin.H{}
+	}
+
+	c.JSON(http.StatusOK, Response{
+		Code:    errcode.Success.Code(),
+		Message: errcode.Success.Message(),
+		Data:    data,
+		Details: detailMsg,
+	})
+}
+
 // Error sends an error response
-func Error(c *gin.Context, err error) {
+
+// handleGRPCError handles gRPC errors
+func handleGRPCError(c *gin.Context, err error) {
+	st, ok := status.FromError(err)
+	if !ok {
+		// If it's not a gRPC error, treat it as an internal server error
+		c.JSON(http.StatusInternalServerError, Response{
+			Code:    int(codes.Internal),
+			Message: "Internal Server Error",
+			Data:    gin.H{},
+		})
+		return
+	}
+
+	response := Response{
+		Code:    int(st.Code()),
+		Message: st.Message(),
+		Data:    gin.H{},
+		Details: make([]string, 0, len(st.Details())),
+	}
+
+	for _, detail := range st.Details() {
+		response.Details = append(response.Details, cast.ToString(detail))
+	}
+
+	c.JSON(httpstatus.HTTPStatusFromCode(st.Code()), response)
+}
+
+func ErrorResponse(c *gin.Context, err error) {
 	if err == nil {
 		SuccessResponse(c, nil)
 		return
@@ -67,31 +108,38 @@ func Error(c *gin.Context, err error) {
 	}
 }
 
-// handleGRPCError handles gRPC errors
-func handleGRPCError(c *gin.Context, err error) {
-	st, ok := status.FromError(err)
-	if !ok {
-		// If it's not a gRPC error, treat it as an internal server error
-		c.JSON(http.StatusInternalServerError, Response{
-			Code:    int(codes.Internal),
-			Message: "Internal Server Error",
-			Data:    gin.H{},
-		})
-		return
+func ErrorResponseWithData(c *gin.Context, data interface{}) {
+	customError := errcode.ErrCustomError
+	response := Response{
+		Code: customError.Code(),
+		Data: data,
 	}
+
+	c.JSON(errcode.ToHTTPStatusCode(customError.Code()), response)
+
+}
+
+func ErrorResponseWithMessage(c *gin.Context, message string) {
+	customError := errcode.ErrCustomError
+	response := Response{
+		Code:    customError.Code(),
+		Message: message,
+	}
+
+	c.JSON(errcode.ToHTTPStatusCode(customError.Code()), response)
+
+}
+
+func ErrorResponseWithDetailed(c *gin.Context, data interface{}, details []string) {
+	customError := errcode.ErrCustomError
 
 	response := Response{
-		Code:    int(st.Code()),
-		Message: st.Message(),
-		Data:    gin.H{},
-		Details: make([]string, 0, len(st.Details())),
+		Code:    customError.Code(),
+		Data:    data,
+		Details: details,
 	}
 
-	for _, detail := range st.Details() {
-		response.Details = append(response.Details, cast.ToString(detail))
-	}
-
-	c.JSON(httpstatus.HTTPStatusFromCode(st.Code()), response)
+	c.JSON(errcode.ToHTTPStatusCode(customError.Code()), response)
 }
 
 // RouteNotFound handles 404 errors

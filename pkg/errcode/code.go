@@ -31,4 +31,5 @@ var (
 	ErrIPRequestsOutOfRateLimit = NewCustomError(10024, "IP requests out of rate limit")                 // IP 请求频次超过上限
 	ErrMissRequiredParam        = NewCustomError(10025, "Miss required parameter (%s)")                  // 缺少必选参数 (%s)，请参考 API 文档
 	ErrParamError               = NewCustomError(10026, "Param error, see doc for more info")            // 参数错误，参考 API 文档
+	ErrCustomError              = NewCustomError(10027, "Custom error")                                  // 自定义错误
 )
