@@ -5,11 +5,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
-(
-"Meow-backend/internal/repository"
-"github.com/redis/go-redis/v9"
-"gorm.io/gorm"
-)
+
 type Service struct {
 	db *gorm.DB
 	rc *redis.Client
