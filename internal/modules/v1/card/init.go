@@ -1,7 +1,7 @@
 package card
 
 import (
-	"Meow-backend/internal/initialize"
+	"Meow-backend/internal/interfaces"
 	"Meow-backend/internal/modules"
 	"Meow-backend/pkg/auth"
 	"Meow-backend/pkg/log"
@@ -9,10 +9,10 @@ import (
 )
 
 type CardModule struct {
-	appCtx *initialize.AppInstance
+	appCtx *interfaces.AppContext
 }
 
-func NewCardModule(ctx *initialize.AppInstance) modules.Module {
+func NewCardModule(ctx *interfaces.AppContext) modules.Module {
 	return &CardModule{ctx}
 }
 
@@ -20,7 +20,7 @@ func (u *CardModule) Name() string {
 	return "Card"
 }
 
-func (u *CardModule) Init(appCtx *initialize.AppInstance) {
+func (u *CardModule) Init(appCtx *interfaces.AppContext) {
 	u.appCtx = appCtx
 	log.Info("Initializing card module")
 }

@@ -23,7 +23,7 @@ type RegisterRequest struct {
 // @Param req body RegisterRequest true "请求参数"
 // @Success 200 {object} model.UserInfo "用户信息"
 // @Router /Register [post]
-func RegisterHandler(c *gin.Context) {
+func (handler *user.Handler) RegisterHandler(c *gin.Context) {
 	// get request params
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

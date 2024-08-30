@@ -1,7 +1,7 @@
 package im
 
 import (
-	"Meow-backend/internal/initialize"
+	"Meow-backend/internal/interfaces"
 	"Meow-backend/internal/modules"
 	"Meow-backend/pkg/auth"
 	"Meow-backend/pkg/log"
@@ -9,10 +9,10 @@ import (
 )
 
 type IMModule struct {
-	appCtx *initialize.AppInstance
+	appCtx *interfaces.AppContext
 }
 
-func NewIMModule(appCtx *initialize.AppInstance) modules.Module {
+func NewIMModule(appCtx *interfaces.AppContext) modules.Module {
 	return &IMModule{appCtx: appCtx}
 }
 
@@ -20,7 +20,7 @@ func (u *IMModule) Name() string {
 	return "IM"
 }
 
-func (u *IMModule) Init(appCtx *initialize.AppInstance) {
+func (u *IMModule) Init(appCtx *interfaces.AppContext) {
 	u.appCtx = appCtx
 	log.Info("Initializing im module")
 }

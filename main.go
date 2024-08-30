@@ -34,8 +34,11 @@ func main() {
 	redisClient := initRedis(ctx, conf)
 	defer initialize.CloseRedis(redisClient)
 
-	var appCtxInstance = initialize.AppCtxInstance
-
+	var appCtxInstance = initialize.NewAppInstance(
+		initialize.WithDB(db),
+		initialize.WithGormDB(gormDB),
+		initialize.WithRedisClient(redisClient),
+	)
 	r := initRouter(ctx, appCtxInstance)
 
 	startServer(r, conf.Port)
@@ -60,8 +63,6 @@ func initDatabase(ctx context.Context, conf *initialize.AppEnvConfig) (*sql.DB, 
 	if err != nil {
 		log.Fatalf("Error initializing database: %v", err)
 	}
-	initialize.AppCtxInstance.Db = db
-	initialize.AppCtxInstance.GormDb = gormDB
 	return db, gormDB
 }
 
@@ -70,7 +71,6 @@ func initRedis(ctx context.Context, conf *initialize.AppEnvConfig) *redis.Client
 	if err != nil {
 		log.Fatalf("Error initializing Redis: %v", err)
 	}
-	initialize.AppCtxInstance.RedisClient = redisClient
 	return redisClient
 }
 

@@ -32,8 +32,10 @@ func CreateAuthMiddleware(level auth.PermissionLevel) gin.HandlerFunc {
 
 func isAuthenticated(c *gin.Context) bool {
 	// 实现用户认证逻辑
+	return true
 }
 
 func isAdmin(c *gin.Context) bool {
 	// 实现管理员验证逻辑
+	return false
 }

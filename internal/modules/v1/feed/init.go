@@ -1,7 +1,7 @@
 package feed
 
 import (
-	"Meow-backend/internal/initialize"
+	"Meow-backend/internal/interfaces"
 	"Meow-backend/internal/modules"
 	"Meow-backend/pkg/auth"
 	"Meow-backend/pkg/log"
@@ -9,10 +9,10 @@ import (
 )
 
 type FeedModule struct {
-	appCtx *initialize.AppInstance
+	appCtx *interfaces.AppContext
 }
 
-func NewFeedModule(appCtx *initialize.AppInstance) modules.Module {
+func NewFeedModule(appCtx *interfaces.AppContext) modules.Module {
 	return &FeedModule{appCtx: appCtx}
 }
 
@@ -20,7 +20,7 @@ func (u *FeedModule) Name() string {
 	return "Feed"
 }
 
-func (u *FeedModule) Init(appCtx *initialize.AppInstance) {
+func (u *FeedModule) Init(appCtx *interfaces.AppContext) {
 	u.appCtx = appCtx
 	log.Info("Initializing feed module")
 }

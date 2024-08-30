@@ -1,6 +1,7 @@
 package initialize
 
 import (
+	"Meow-backend/internal/interfaces"
 	"Meow-backend/internal/modules"
 	"Meow-backend/pkg/app"
 	"Meow-backend/pkg/errcode"
@@ -11,7 +12,7 @@ import (
 	"net/http"
 )
 
-func InitRoute(ctx context.Context, appCtx *AppInstance) (*gin.Engine, error) {
+func InitRoute(ctx context.Context, appCtx *interfaces.AppContext) (*gin.Engine, error) {
 	// 设置 Gin 路由
 	gin.SetMode(gin.ReleaseMode)
 	server := gin.Default()

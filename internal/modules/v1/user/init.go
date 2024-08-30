@@ -1,7 +1,7 @@
 package user
 
 import (
-	"Meow-backend/internal/initialize"
+	"Meow-backend/internal/interfaces"
 	"Meow-backend/internal/modules"
 	"Meow-backend/internal/modules/v1/user/handler"
 	"Meow-backend/pkg/auth"
@@ -10,10 +10,10 @@ import (
 )
 
 type UserModule struct {
-	appCtx *initialize.AppInstance
+	appCtx *interfaces.AppContext
 }
 
-func NewUserModule(ctx *initialize.AppInstance) modules.Module {
+func NewUserModule(ctx *interfaces.AppContext) modules.Module {
 	return &UserModule{ctx}
 }
 
@@ -21,7 +21,7 @@ func (u *UserModule) Name() string {
 	return "User"
 }
 
-func (u *UserModule) Init(appCtx *initialize.AppInstance) {
+func (u *UserModule) Init(appCtx *interfaces.AppContext) {
 	u.appCtx = appCtx
 	log.Info("Initializing user module")
 }

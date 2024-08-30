@@ -1,6 +1,7 @@
 package initialize
 
 import (
+	"Meow-backend/internal/interfaces"
 	logger "Meow-backend/pkg/log"
 	"database/sql"
 	"errors"
@@ -13,20 +14,14 @@ import (
 
 type Mode string
 
-var (
-	EnvConfig      AppEnvConfig
-	AppCtxInstance *AppInstance = &AppInstance{
-		Db:          nil,
-		GormDb:      nil,
-		RedisClient: nil,
-	}
+const (
+	DebugMode   Mode = "debug"
+	ReleaseMode Mode = "release"
+	TestMode    Mode = "test"
 )
 
-type AppInstance struct {
-	Db          *sql.DB
-	GormDb      *gorm.DB
-	RedisClient *redis.Client
-}
+var ConfigPath = "config/"
+
 type AppEnvConfig struct {
 	Name              string      `mapstructure:"Name"`
 	Version           string      `mapstructure:"Version"`
@@ -46,12 +41,6 @@ type AppEnvConfig struct {
 	OTelConfig        OTelConfig  `mapstructure:"OTel"`
 }
 
-const (
-	DebugMode   Mode = "debug"
-	ReleaseMode Mode = "release"
-	TestMode    Mode = "test"
-)
-
 type JWTConfig struct {
 	SecretKey string `mapstructure:"JwtSecret"`
 	ExpiresIn int    `mapstructure:"JwtTimeout"`
@@ -62,7 +51,61 @@ type OTelConfig struct {
 	Insecure bool   `mapstructure:"Insecure"`
 }
 
-var ConfigPath = "config/"
+var (
+	EnvConfig AppEnvConfig
+)
+
+type AppInstance struct {
+	Db          *sql.DB
+	GormDb      *gorm.DB
+	RedisClient *redis.Client
+}
+
+type AppOption func(*AppInstance)
+
+func WithDB(db *sql.DB) AppOption {
+	return func(a *AppInstance) {
+		a.Db = db
+	}
+}
+
+func WithGormDB(gormDb *gorm.DB) AppOption {
+	return func(a *AppInstance) {
+		a.GormDb = gormDb
+	}
+}
+
+func WithRedisClient(redisClient *redis.Client) AppOption {
+	return func(a *AppInstance) {
+		a.RedisClient = redisClient
+	}
+}
+
+func NewAppInstance(opts ...AppOption) *AppInstance {
+	app := &AppInstance{}
+	for _, opt := range opts {
+		opt(app)
+	}
+	return app
+}
+
+func (a *AppInstance) GetDB() *sql.DB {
+	return a.Db
+}
+
+func (a *AppInstance) GetGormDB() *gorm.DB {
+	return a.GormDb
+}
+
+func (a *AppInstance) GetRedisClient() *redis.Client {
+	return a.RedisClient
+}
+
+var AppCtxInstance interfaces.AppContext = &AppInstance{
+	Db:          nil,
+	GormDb:      nil,
+	RedisClient: nil,
+}
 
 func LoadConfig(path string) AppEnvConfig {
 	// 从环境变量中获取配置
