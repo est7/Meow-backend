@@ -44,7 +44,7 @@ func (u *UserModule) RegisterRoutes(r *gin.Engine, authMiddleware func(auth.Perm
 	//4. 重置密码 (Reset Password) - 通常通过一次性令牌访问
 	//5. 刷新令牌 (Refresh Token) - 使用 refresh token 获取新的 access token
 	//6. 获取 sms 验证码 (Get SMS Code)
-	public := r.Group("/api/v1/user")
+	public := r.Group("/api/v1/user", authMiddleware(auth.Public))
 	{
 		public.POST("/register", u.handler.RegisterHandler)
 		public.POST("/login-email", u.handler.EmailLoginHandler)
