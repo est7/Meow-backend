@@ -2,7 +2,6 @@ package handler
 
 import (
 	"Meow-backend/internal/models"
-	"Meow-backend/internal/modules/v1/user"
 	"Meow-backend/pkg/errcode"
 	"Meow-backend/pkg/log"
 	"github.com/gin-gonic/gin"
@@ -23,11 +22,15 @@ type RegisterRequest struct {
 // @Param req body RegisterRequest true "请求参数"
 // @Success 200 {object} model.UserInfo "用户信息"
 // @Router /Register [post]
-func (handler *user.Handler) RegisterHandler(c *gin.Context) {
+func (handler *UserHandler) RegisterHandler(c *gin.Context) {
 	// get request params
 	var req RegisterRequest
+	//测试 spanlog 跟 zaplog 区别
+	logger := log.WithContext(c)
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		log.Warnf("register bind param err: %v", err)
+		logger.Warnf("register bind param err: %v", err)
 		models.FailResult(c, errcode.ErrInvalidParam)
 		return
 	}
@@ -43,20 +46,20 @@ func (handler *user.Handler) RegisterHandler(c *gin.Context) {
 	// check password and confirm password is same
 	if req.Password != req.ConfirmPassword {
 		log.Warnf("twice password is not same")
-		models.FailWithMessage("twice password is not same", c)
+		models.FailWithMessage(c, "twice password is not same")
 		return
 	}
 
 	// 检查用户名是否已被注册（如果提供了用户名）
 	if req.Username != "" {
-		exists, err := service.CheckUsernameExists(req.Username)
+		exists, err := handler.userService.CheckUsernameExists(req.Username)
 		if err != nil {
 			log.Errorf("error checking username existence: %v", err)
 			models.FailResult(c, errcode.ErrInternalServer)
 			return
 		}
 		if exists {
-			models.FailWithMessage("Username already exists", c)
+			models.FailWithMessage(c, "Username already exists")
 			return
 		}
 	}
@@ -64,9 +67,9 @@ func (handler *user.Handler) RegisterHandler(c *gin.Context) {
 	// 根据提供的信息进行注册
 	var err error
 	if req.Email != "" {
-		err = service.RegisterWithEmail(c, req.Email, req.Password)
+		err = handler.userService.RegisterWithEmail(c, req.Email, req.Password)
 	} else {
-		err = service.RegisterWithUsername(c, req.Username, req.Password)
+		err = handler.userService.RegisterWithUsername(c, req.Username, req.Password)
 	}
 
 	if err != nil {
@@ -75,7 +78,5 @@ func (handler *user.Handler) RegisterHandler(c *gin.Context) {
 		return
 	}
 
-	models.OkResult(c, "Registration successful")
-	user.UserService.Register(c, req.Username, req.Email, req.Password)
-
+	models.OkWithMessage(c, "Registration successful")
 }

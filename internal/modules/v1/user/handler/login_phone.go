@@ -7,6 +7,6 @@ type LoginPhoneCredentialsRequest struct {
 	VerifyCode int   `json:"verify_code" form:"verify_code" binding:"required" example:"120110"`
 }
 
-func PhoneLoginHandler(c *gin.Context) {
+func (handler *UserHandler) PhoneLoginHandler(c *gin.Context) {
 
 }

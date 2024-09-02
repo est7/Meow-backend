@@ -7,6 +7,6 @@ type LoginEmailCredentialsRequest struct {
 	Password string `json:"password" form:"password" binding:"required" `
 }
 
-func EmailLoginHandler(c *gin.Context) {
+func (handler *UserHandler) EmailLoginHandler(c *gin.Context) {
 
 }

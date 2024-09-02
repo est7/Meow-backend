@@ -1,24 +1,12 @@
 package handler
 
-import (
-	"Meow-backend/internal/models"
-	"Meow-backend/pkg/errcode"
-	"github.com/gin-gonic/gin"
-)
-
 type CheckUsernameExistsRequest struct {
 	Username string `json:"username"`
 }
 
-func CheckUsernameExists(c *gin.Context) {
-	var req CheckUsernameExistsRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		models.FailResult(c, errcode.ErrInvalidParam)
-		return
-	}
-
-	exists, err := CheckUsernameExists(req.Username)
-
+func (handler *UserHandler) CheckUsernameExists(username string) (bool, error) {
+	//exists, err := CheckUsernameExists(req.Username)
+	return false, nil
 }
 
 //func (d *repository) UserIsExist(user *models.UserBaseModel) (bool, error) {

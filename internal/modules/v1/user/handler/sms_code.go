@@ -2,6 +2,6 @@ package handler
 
 import "github.com/gin-gonic/gin"
 
-func SmsCode(c *gin.Context) {
+func (handler *UserHandler) SmsCode(c *gin.Context) {
 
 }

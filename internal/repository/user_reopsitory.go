@@ -1,9 +1,8 @@
 package repository
 
 import (
+	"Meow-backend/internal/interfaces"
 	"Meow-backend/internal/models"
-	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 )
 
 type UserRepository interface {
@@ -15,48 +14,33 @@ type UserRepository interface {
 }
 
 type UserRepositoryImpl struct {
-	db    *gorm.DB
-	redis *redis.Client
+	interfaces.Repository
 }
 
-func NewUserRepositoryImpl(db *gorm.DB, redis *redis.Client) *UserRepositoryImpl {
-	return &UserRepositoryImpl{
-		db:    db,
-		redis: redis,
+func NewUserRepository(base interfaces.Repository) *UserRepositoryImpl {
+	return &UserRepositoryImpl{Repository: base}
+}
+
+func (repo *UserRepositoryImpl) GetUserByEmail(email string) (*models.UserBaseModel, error) {
+	var user models.UserBaseModel
+	if err := repo.GetDB().Where("email = ?", email).First(&user).Error; err != nil {
+		return nil, err
 	}
+	return &user, nil
 }
-
-// GetUserByEmail 实现
-func (r *UserRepositoryImpl) GetUserByEmail(email string) (*models.UserBaseModel, error) {
-	var user *models.UserBaseModel
-	result := r.db.Where("email = ?", email).First(&user)
-	if result.Error != nil {
-		return nil, result.Error
+func (repo *UserRepositoryImpl) CreateUser(user *models.UserBaseModel) error {
+	return repo.GetDB().Create(user).Error
+}
+func (repo *UserRepositoryImpl) GetUserByID(id int) (*models.UserBaseModel, error) {
+	var user models.UserBaseModel
+	if err := repo.GetDB().Where("id = ?", id).First(&user).Error; err != nil {
+		return nil, err
 	}
-	return &models.UserBaseModel{}, nil
+	return &user, nil
 }
-
-// CreateUser 实现
-func (r *UserRepositoryImpl) CreateUser(user *models.UserBaseModel) error {
-	return r.db.Create(user).Error
+func (repo *UserRepositoryImpl) UpdateUser(user *models.UserBaseModel) error {
+	return repo.GetDB().Save(user).Error
 }
-
-// GetUserByID 实现
-func (r *UserRepositoryImpl) GetUserByID(id int) (*models.UserBaseModel, error) {
-	var user *models.UserBaseModel
-	result := r.db.First(&user, id)
-	if result.Error != nil {
-		return nil, result.Error
-	}
-	return &models.UserBaseModel{}, nil
-}
-
-// UpdateUser 实现
-func (r *UserRepositoryImpl) UpdateUser(user *models.UserBaseModel) error {
-	return r.db.Save(user).Error
-}
-
-// DeleteUser 实现
-func (r *UserRepositoryImpl) DeleteUser(user *models.UserBaseModel) error {
-	return r.db.Delete(user).Error
+func (repo *UserRepositoryImpl) DeleteUser(user *models.UserBaseModel) error {
+	return repo.GetDB().Delete(user).Error
 }

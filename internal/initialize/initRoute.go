@@ -2,7 +2,6 @@ package initialize
 
 import (
 	"Meow-backend/internal/interfaces"
-	"Meow-backend/internal/modules"
 	"Meow-backend/pkg/app"
 	"Meow-backend/pkg/errcode"
 	"Meow-backend/pkg/middlewares"
@@ -12,7 +11,7 @@ import (
 	"net/http"
 )
 
-func InitRoute(ctx context.Context, appCtx *interfaces.AppContext) (*gin.Engine, error) {
+func InitRoute(ctx context.Context, appCtx interfaces.AppContext) (*gin.Engine, error) {
 	// 设置 Gin 路由
 	gin.SetMode(gin.ReleaseMode)
 	server := gin.Default()
@@ -37,7 +36,7 @@ func InitRoute(ctx context.Context, appCtx *interfaces.AppContext) (*gin.Engine,
 	// hostnameHealthCheck 主机名健康检查路由
 	server.GET("/hostname", app.HostnameHealthCheck)
 
-	allModules := modules.InitModules(appCtx)
+	allModules := interfaces.InitModules(appCtx)
 	for _, module := range allModules {
 		module.RegisterRoutes(server, middlewares.CreateAuthMiddleware)
 	}
@@ -55,7 +54,7 @@ func healthCheck(c *gin.Context) {
 	details := make(map[string]string)
 
 	// 检查数据库连接
-	if err := AppCtxInstance.Db.Ping(); err != nil {
+	if err := AppCtxInstance.GetDB().Ping(); err != nil {
 		status = "DOWN"
 		details["database"] = "Database connection failed: " + err.Error()
 	} else {
@@ -63,7 +62,7 @@ func healthCheck(c *gin.Context) {
 	}
 
 	// 检查 Redis 连接
-	if _, err := AppCtxInstance.RedisClient.Ping(c).Result(); err != nil {
+	if _, err := AppCtxInstance.GetRedisClient().Ping(c).Result(); err != nil {
 		status = "DOWN"
 		details["redis"] = "Redis connection failed: " + err.Error()
 	} else {

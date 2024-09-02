@@ -2,43 +2,34 @@ package initialize
 
 import (
 	"Meow-backend/internal/interfaces"
-	logger "Meow-backend/pkg/log"
+	"Meow-backend/pkg/log"
 	"database/sql"
 	"errors"
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	viper2 "github.com/spf13/viper"
 	"gorm.io/gorm"
-	"log"
-)
-
-type Mode string
-
-const (
-	DebugMode   Mode = "debug"
-	ReleaseMode Mode = "release"
-	TestMode    Mode = "test"
 )
 
 var ConfigPath = "config/"
 
 type AppEnvConfig struct {
-	Name              string      `mapstructure:"Name"`
-	Version           string      `mapstructure:"Version"`
-	Port              string      `mapstructure:"Port"`
-	PprofPort         string      `mapstructure:"PprofPort"`
-	Mode              Mode        `mapstructure:"Mode"`
-	CookieName        string      `mapstructure:"CookieName"`
-	SSL               bool        `mapstructure:"SSL"`
-	CtxDefaultTimeout int         `mapstructure:"CtxDefaultTimeout"`
-	CSRF              bool        `mapstructure:"CSRF"`
-	Debug             bool        `mapstructure:"Debug"`
-	EnableTrace       bool        `mapstructure:"EnableTrace"`
-	EnablePprof       bool        `mapstructure:"EnablePprof"`
-	PGConfig          PGConfig    `mapstructure:"DB"`
-	RedisConfig       RedisConfig `mapstructure:"Redis"`
-	JWTConfig         JWTConfig   `mapstructure:"Jwt"`
-	OTelConfig        OTelConfig  `mapstructure:"OTel"`
+	Name              string          `mapstructure:"Name"`
+	Version           string          `mapstructure:"Version"`
+	Port              string          `mapstructure:"Port"`
+	PprofPort         string          `mapstructure:"PprofPort"`
+	Mode              interfaces.Mode `mapstructure:"Mode"`
+	CookieName        string          `mapstructure:"CookieName"`
+	SSL               bool            `mapstructure:"SSL"`
+	CtxDefaultTimeout int             `mapstructure:"CtxDefaultTimeout"`
+	CSRF              bool            `mapstructure:"CSRF"`
+	Debug             bool            `mapstructure:"Debug"`
+	EnableTrace       bool            `mapstructure:"EnableTrace"`
+	EnablePprof       bool            `mapstructure:"EnablePprof"`
+	PGConfig          PGConfig        `mapstructure:"DB"`
+	RedisConfig       RedisConfig     `mapstructure:"Redis"`
+	JWTConfig         JWTConfig       `mapstructure:"Jwt"`
+	OTelConfig        OTelConfig      `mapstructure:"OTel"`
 }
 
 type JWTConfig struct {
@@ -135,7 +126,7 @@ func LoadConfig(path string) AppEnvConfig {
 	return EnvConfig
 }
 
-func LoadLoggerConfig(path string, mode Mode) logger.Logger {
+func LoadLoggerConfig(path string, mode interfaces.Mode) interfaces.Logger {
 	// 从环境变量中获取配置
 	viper := viper2.GetViper()
 	viper.AddConfigPath(path)
@@ -155,7 +146,7 @@ func LoadLoggerConfig(path string, mode Mode) logger.Logger {
 	}
 
 	// 将配置文件映射到结构体
-	var loggerConfig logger.LoggerConfig
+	var loggerConfig log.LoggerConfig
 	if err = viper.Unmarshal(&loggerConfig); err != nil {
 		log.Fatalf("Unable to decode into struct: %v", err)
 	}
@@ -163,12 +154,11 @@ func LoadLoggerConfig(path string, mode Mode) logger.Logger {
 	fmt.Printf("Loaded config: %+v\n", loggerConfig)
 
 	zapLogger := initZapLogger(&loggerConfig, mode)
-
 	return zapLogger
 }
 
-func initZapLogger(cfg *logger.LoggerConfig, mode Mode) logger.Logger {
-	return logger.InitZapLogger(cfg, mode)
+func initZapLogger(cfg *log.LoggerConfig, mode interfaces.Mode) interfaces.Logger {
+	return log.InitZapLogger(cfg, mode)
 }
 
 /**

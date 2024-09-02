@@ -2,7 +2,7 @@ package main
 
 import (
 	"Meow-backend/internal/initialize"
-	"Meow-backend/internal/modules"
+	"Meow-backend/internal/interfaces"
 	"Meow-backend/internal/modules/v1/card"
 	"Meow-backend/internal/modules/v1/feed"
 	"Meow-backend/internal/modules/v1/im"
@@ -52,10 +52,10 @@ func initConfig() *initialize.AppEnvConfig {
 }
 
 func registerModule() {
-	modules.RegisterModuleFactory(user.NewUserModule)
-	modules.RegisterModuleFactory(feed.NewFeedModule)
-	modules.RegisterModuleFactory(card.NewCardModule)
-	modules.RegisterModuleFactory(im.NewIMModule)
+	interfaces.RegisterModuleFactory(user.NewUserModule)
+	interfaces.RegisterModuleFactory(feed.NewFeedModule)
+	interfaces.RegisterModuleFactory(card.NewCardModule)
+	interfaces.RegisterModuleFactory(im.NewIMModule)
 }
 
 func initDatabase(ctx context.Context, conf *initialize.AppEnvConfig) (*sql.DB, *gorm.DB) {
@@ -74,7 +74,7 @@ func initRedis(ctx context.Context, conf *initialize.AppEnvConfig) *redis.Client
 	return redisClient
 }
 
-func initRouter(ctx context.Context, appCtx *initialize.AppInstance) *gin.Engine {
+func initRouter(ctx context.Context, appCtx interfaces.AppContext) *gin.Engine {
 	r, err := initialize.InitRoute(ctx, appCtx)
 	if err != nil {
 		log.Fatalf("Error initializing route: %v", err)

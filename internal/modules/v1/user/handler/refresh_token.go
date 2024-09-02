@@ -2,6 +2,6 @@ package handler
 
 import "github.com/gin-gonic/gin"
 
-func RefreshTokenHandler(c *gin.Context) {
+func (handler *UserHandler) RefreshTokenHandler(c *gin.Context) {
 
 }

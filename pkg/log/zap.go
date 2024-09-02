@@ -39,7 +39,7 @@ var (
 	logDir   string
 )
 
-// For mapping config logger to app logger levels
+// For mapping config zapLogger to app zapLogger levels
 var loggerLevelMap = map[string]zapcore.Level{
 	"debug":  zapcore.DebugLevel,
 	"info":   zapcore.InfoLevel,
@@ -62,12 +62,12 @@ func getLoggerLevel(cfg *LoggerConfig) zapcore.Level {
 	return level
 }
 
-// zapLogger logger struct
-type zapLogger struct {
+// zapLogger zapLogger struct
+type sugarZapLogger struct {
 	sugarLogger *zap.SugaredLogger
 }
 
-// newZapLogger new zap logger
+// newZapLogger new zap zapLogger
 func newZapLogger(cfg *LoggerConfig, opts ...Option) (*zap.Logger, error) {
 	for _, opt := range opts {
 		opt(cfg)
@@ -75,12 +75,12 @@ func newZapLogger(cfg *LoggerConfig, opts ...Option) (*zap.Logger, error) {
 	return buildLogger(cfg, defaultSkip), nil
 }
 
-// newLoggerWithCallerSkip new logger with caller skip
+// newLoggerWithCallerSkip new zapLogger with caller skip
 func newLoggerWithCallerSkip(cfg *LoggerConfig, skip int, opts ...Option) (Logger, error) {
 	for _, opt := range opts {
 		opt(cfg)
 	}
-	return &zapLogger{sugarLogger: buildLogger(cfg, defaultSkip+skip).Sugar()}, nil
+	return &sugarZapLogger{sugarLogger: buildLogger(cfg, defaultSkip+skip).Sugar()}, nil
 }
 
 func buildLogger(cfg *LoggerConfig, skip int) *zap.Logger {
@@ -237,60 +237,60 @@ func getLogWriterWithTime(cfg *LoggerConfig, filename string) io.Writer {
 	return hook
 }
 
-// Debug logger
-func (l *zapLogger) Debug(args ...interface{}) {
+// Debug zapLogger
+func (l *sugarZapLogger) Debug(args ...interface{}) {
 	l.sugarLogger.Debug(args...)
 }
 
-// Info logger
-func (l *zapLogger) Info(args ...interface{}) {
+// Info zapLogger
+func (l *sugarZapLogger) Info(args ...interface{}) {
 	l.sugarLogger.Info(args...)
 }
 
-// Warn logger
-func (l *zapLogger) Warn(args ...interface{}) {
+// Warn zapLogger
+func (l *sugarZapLogger) Warn(args ...interface{}) {
 	l.sugarLogger.Warn(args...)
 }
 
-// Error logger
-func (l *zapLogger) Error(args ...interface{}) {
+// Error zapLogger
+func (l *sugarZapLogger) Error(args ...interface{}) {
 	l.sugarLogger.Error(args...)
 }
 
-func (l *zapLogger) Fatal(args ...interface{}) {
+func (l *sugarZapLogger) Fatal(args ...interface{}) {
 	l.sugarLogger.Fatal(args...)
 }
 
-func (l *zapLogger) Debugf(format string, args ...interface{}) {
+func (l *sugarZapLogger) Debugf(format string, args ...interface{}) {
 	l.sugarLogger.Debugf(format, args...)
 }
 
-func (l *zapLogger) Infof(format string, args ...interface{}) {
+func (l *sugarZapLogger) Infof(format string, args ...interface{}) {
 	l.sugarLogger.Infof(format, args...)
 }
 
-func (l *zapLogger) Warnf(format string, args ...interface{}) {
+func (l *sugarZapLogger) Warnf(format string, args ...interface{}) {
 	l.sugarLogger.Warnf(format, args...)
 }
 
-func (l *zapLogger) Errorf(format string, args ...interface{}) {
+func (l *sugarZapLogger) Errorf(format string, args ...interface{}) {
 	l.sugarLogger.Errorf(format, args...)
 }
 
-func (l *zapLogger) Fatalf(format string, args ...interface{}) {
+func (l *sugarZapLogger) Fatalf(format string, args ...interface{}) {
 	l.sugarLogger.Fatalf(format, args...)
 }
 
-func (l *zapLogger) Panicf(format string, args ...interface{}) {
+func (l *sugarZapLogger) Panicf(format string, args ...interface{}) {
 	l.sugarLogger.Panicf(format, args...)
 }
 
-func (l *zapLogger) WithFields(fields Fields) Logger {
+func (l *sugarZapLogger) WithFields(fields Fields) Logger {
 	var f = make([]interface{}, 0)
 	for k, v := range fields {
 		f = append(f, k)
 		f = append(f, v)
 	}
 	newLogger := l.sugarLogger.With(f...)
-	return &zapLogger{newLogger}
+	return &sugarZapLogger{newLogger}
 }

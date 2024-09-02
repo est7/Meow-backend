@@ -10,7 +10,7 @@ type LoginUsernameCredentialsRequest struct {
 	Password string `json:"password" form:"password" binding:"required" `
 }
 
-func UsernameLoginHandler(c *gin.Context) {
+func (handler *UserHandler) UsernameLoginHandler(c *gin.Context) {
 	// get request params
 	var req LoginUsernameCredentialsRequest
 	if err := c.ShouldBind(&req); err != nil {

@@ -1,4 +1,4 @@
-// Package log span logger for trace
+// Package log span zapLogger for trace
 // reference: https://github.com/jaegertracing/jaeger/tree/master/examples/hotrod/pkg/log
 package log
 

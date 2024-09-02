@@ -6,12 +6,6 @@ import (
 	"gorm.io/gorm"
 )
 
-//type Module interface {
-//	Name() string
-//	Init(appCtx AppContext)
-//	RegisterRoutes(r *gin.Engine, authMiddleware func(auth.PermissionLevel) gin.HandlerFunc)
-//}
-
 type AppContext interface {
 	GetDB() *sql.DB
 	GetGormDB() *gorm.DB

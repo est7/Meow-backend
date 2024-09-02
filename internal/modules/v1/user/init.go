@@ -2,26 +2,35 @@ package user
 
 import (
 	"Meow-backend/internal/interfaces"
-	"Meow-backend/internal/modules"
 	"Meow-backend/internal/modules/v1/user/handler"
+	factrory "Meow-backend/internal/modules/v1/user/service"
 	"Meow-backend/pkg/auth"
 	"Meow-backend/pkg/log"
 	"github.com/gin-gonic/gin"
 )
 
 type UserModule struct {
-	appCtx *interfaces.AppContext
+	appCtx  interfaces.AppContext
+	handler *handler.UserHandler
 }
 
-func NewUserModule(ctx *interfaces.AppContext) modules.Module {
-	return &UserModule{ctx}
+func NewUserModule(ctx interfaces.AppContext) interfaces.Module {
+	repo := interfaces.NewRepository(ctx.GetGormDB())
+	serviceFactory := factrory.NewUserServiceFactory(interfaces.NewServiceFactory())
+	service := serviceFactory.CreateService(repo, ctx.GetRedisClient())
+	userHandler := handler.NewUserHandler(interfaces.NewHandler(service))
+
+	return &UserModule{
+		appCtx:  ctx,
+		handler: userHandler,
+	}
 }
 
 func (u *UserModule) Name() string {
 	return "User"
 }
 
-func (u *UserModule) Init(appCtx *interfaces.AppContext) {
+func (u *UserModule) Init(appCtx interfaces.AppContext) {
 	u.appCtx = appCtx
 	log.Info("Initializing user module")
 }
@@ -37,15 +46,15 @@ func (u *UserModule) RegisterRoutes(r *gin.Engine, authMiddleware func(auth.Perm
 	//6. 获取 sms 验证码 (Get SMS Code)
 	public := r.Group("/api/v1/user")
 	{
-		public.POST("/register", handler.RegisterHandler)
-		public.POST("/login-email", handler.EmailLoginHandler)
-		public.POST("/login-phone", handler.PhoneLoginHandler)
-		public.POST("/login-username", handler.UsernameLoginHandler)
-		public.POST("/forgot-password", handler.ForgotPasswordHandler)
-		public.POST("/reset-password", handler.ResetPasswordHandler)
-		public.POST("/refresh-token", handler.RefreshTokenHandler)
-		public.GET("/vcode", handler.VCode)     // 验证码
-		public.GET("/smscode", handler.SmsCode) // 短信验证码
+		public.POST("/register", u.handler.RegisterHandler)
+		public.POST("/login-email", u.handler.EmailLoginHandler)
+		public.POST("/login-phone", u.handler.PhoneLoginHandler)
+		public.POST("/login-username", u.handler.UsernameLoginHandler)
+		public.POST("/forgot-password", u.handler.ForgotPasswordHandler)
+		public.POST("/reset-password", u.handler.ResetPasswordHandler)
+		public.POST("/refresh-token", u.handler.RefreshTokenHandler)
+		public.GET("/vcode", u.handler.VCode)     // 验证码
+		public.GET("/smscode", u.handler.SmsCode) // 短信验证码
 	}
 
 	// 需要认证的路由
@@ -60,7 +69,7 @@ func (u *UserModule) RegisterRoutes(r *gin.Engine, authMiddleware func(auth.Perm
 	// 认证相关路由
 	authenticated := r.Group("/api/v1/user", authMiddleware(auth.Authenticated))
 	{
-		authenticated.POST("/change-password", handler.ChangePasswordHandler)
+		authenticated.POST("/change-password", u.handler.ChangePasswordHandler)
 		//authenticated.POST("/bind-phone", handler.BindPhoneHandler)
 		//authenticated.POST("/bind-email", handler.BindEmailHandler)
 		//authenticated.DELETE("/account", handler.DeleteAccountHandler)

@@ -1,7 +1,7 @@
 package log
 
 import (
-	"Meow-backend/internal/initialize"
+	"Meow-backend/internal/interfaces"
 	"context"
 	"fmt"
 	"go.opentelemetry.io/otel/trace"
@@ -10,45 +10,30 @@ import (
 )
 
 // log is A global variable so that log functions can be directly accessed
-var log Logger
-var logger *zap.Logger
+// 公共的全局 zapLogger 变量
+var log interfaces.Logger
+
+// 私有的 zap zapLogger 变量
+var zapLogger *zap.Logger
+
+//var zapLogger *zap.Logger
+
+type Logger = interfaces.Logger
 
 // Fields Type to pass when we want to call WithFields for structured logging
-type Fields map[string]interface{}
+type Fields = interfaces.Fields
 
-// Logger is a contract for the logger
-type Logger interface {
-	Debug(args ...interface{})
-	Debugf(format string, args ...interface{})
-
-	Info(args ...interface{})
-	Infof(format string, args ...interface{})
-
-	Warn(args ...interface{})
-	Warnf(format string, args ...interface{})
-
-	Error(args ...interface{})
-	Errorf(format string, args ...interface{})
-
-	// Fatal logs a message at Fatal level
-	// and process will exit with status set to 1.
-	Fatal(args ...interface{})
-	Fatalf(format string, args ...interface{})
-
-	WithFields(keyValues Fields) Logger
-}
-
-func InitZapLogger(cfg *LoggerConfig, mode initialize.Mode, opts ...Option) Logger {
+func InitZapLogger(cfg *LoggerConfig, mode interfaces.Mode, opts ...Option) interfaces.Logger {
 	var err error
 
 	switch mode {
-	case initialize.DebugMode:
+	case interfaces.DebugMode:
 		cfg.Encoding = "console"
 		cfg.OutputPaths = []string{"stdout", "/var/log/debug.log"}
-	case initialize.TestMode:
+	case interfaces.TestMode:
 		cfg.Encoding = "console"
 		cfg.OutputPaths = []string{"stdout", "/var/log/test.log"}
-	case initialize.ReleaseMode:
+	case interfaces.ReleaseMode:
 		cfg.Encoding = "json"
 		cfg.OutputPaths = []string{"stdout", "/var/log/release.log"}
 	default:
@@ -56,7 +41,7 @@ func InitZapLogger(cfg *LoggerConfig, mode initialize.Mode, opts ...Option) Logg
 		cfg.OutputPaths = []string{"stdout", "/var/log/default.log"}
 	}
 
-	logger, err = newZapLogger(cfg, opts...)
+	zapLogger, err = newZapLogger(cfg, opts...)
 	if err != nil {
 		panic(fmt.Sprintf("init newZapLogger err: %v", err))
 	}
@@ -74,17 +59,18 @@ func GetLogger() Logger {
 	return log
 }
 
-// GetZapLogger return raw zap logger
+// GetZapLogger return raw zap zapLogger
 func GetZapLogger() *zap.Logger {
-	return logger
+	return zapLogger
 }
 
-// WithContext is a logger that can log msg and log span for trace
+// WithContext is a zapLogger that can log msg and log span for trace
+// WithContext 是一个 zap Logger，可以记录消息和日志范围以进行跟踪
 func WithContext(ctx context.Context) Logger {
-	//return zap logger
+	//return zap zapLogger
 
 	if span := trace.SpanFromContext(ctx); span != nil {
-		logger := spanLogger{span: span, logger: logger}
+		logger := spanLogger{span: span, logger: zapLogger}
 
 		spanCtx := span.SpanContext()
 		logger.spanFields = []zapcore.Field{
@@ -97,57 +83,57 @@ func WithContext(ctx context.Context) Logger {
 	return GetLogger()
 }
 
-// Debug logger
+// Debug zapLogger
 func Debug(args ...interface{}) {
 	log.Debug(args...)
 }
 
-// Info logger
+// Info zapLogger
 func Info(args ...interface{}) {
 	log.Info(args...)
 }
 
-// Warn logger
+// Warn zapLogger
 func Warn(args ...interface{}) {
 	log.Warn(args...)
 }
 
-// Error logger
+// Error zapLogger
 func Error(args ...interface{}) {
 	log.Error(args...)
 }
 
-// Fatal logger
+// Fatal zapLogger
 func Fatal(args ...interface{}) {
 	log.Fatal(args...)
 }
 
-// Debugf logger
+// Debugf zapLogger
 func Debugf(format string, args ...interface{}) {
 	log.Debugf(format, args...)
 }
 
-// Infof logger
+// Infof zapLogger
 func Infof(format string, args ...interface{}) {
 	log.Infof(format, args...)
 }
 
-// Warnf logger
+// Warnf zapLogger
 func Warnf(format string, args ...interface{}) {
 	log.Warnf(format, args...)
 }
 
-// Errorf logger
+// Errorf zapLogger
 func Errorf(format string, args ...interface{}) {
 	log.Errorf(format, args...)
 }
 
-// Fatalf logger
+// Fatalf zapLogger
 func Fatalf(format string, args ...interface{}) {
 	log.Fatalf(format, args...)
 }
 
-// WithFields logger
+// WithFields zapLogger
 // output more field, eg:
 //
 //	contextLogger := log.WithFields(log.Fields{"key1": "value1"})
