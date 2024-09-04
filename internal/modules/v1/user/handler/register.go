@@ -10,70 +10,76 @@ import (
 type RegisterRequest struct {
 	Username        string `json:"username" form:"username"`
 	Email           string `json:"email" form:"email"`
+	EmailVCode      string `json:"email_vcode" form:"email_vcode"`
 	Password        string `json:"password" form:"password"`
 	ConfirmPassword string `json:"confirm_password" form:"confirm_password"`
+	Phone           string `json:"phone" form:"phone"`
+	PhoneVCode      string `json:"phone_vcode" form:"phone_vcode"`
 }
 
-// RegisterHandler 注册
-// @Summary 注册
-// @Description 用户注册
-// @Tags 用户
-// @Produce  json
-// @Param req body RegisterRequest true "请求参数"
-// @Success 200 {object} model.UserInfo "用户信息"
-// @Router /Register [post]
-func (handler *UserHandler) RegisterHandler(c *gin.Context) {
-	// get request params
-	var req RegisterRequest
-	//测试 spanlog 跟 zaplog 区别
-	logger := log.WithContext(c)
-
+// RegisterWithUsernameHandler 注册
+func (handler *UserHandler) RegisterWithUsernameHandler(c *gin.Context) {
+	var req struct {
+		Username        string `json:"username" binding:"required"`
+		Password        string `json:"password" binding:"required"`
+		ConfirmPassword string `json:"confirm_password" binding:"required"`
+	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		log.Warnf("register bind param err: %v", err)
-		logger.Warnf("register bind param err: %v", err)
+		log.Warnf("register with username bind param err: %v", err)
 		models.FailResult(c, errcode.ErrInvalidParam)
 		return
 	}
 
-	log.Infof("register req: %#v", req)
-	// validate request params
-	if req.Username == "" || req.Email == "" || req.Password == "" || req.ConfirmPassword == "" {
-		log.Warnf("params is empty: %v", req)
-		models.FailResult(c, errcode.ErrInvalidParam)
-		return
-	}
-
-	// check password and confirm password is same
 	if req.Password != req.ConfirmPassword {
-		log.Warnf("twice password is not same")
-		models.FailWithMessage(c, "twice password is not same")
+		models.FailWithMessage(c, "Passwords do not match")
 		return
 	}
 
-	// 检查用户名是否已被注册（如果提供了用户名）
-	if req.Username != "" {
-		exists, err := handler.userService.CheckUsernameExists(req.Username)
-		if err != nil {
-			log.Errorf("error checking username existence: %v", err)
-			models.FailResult(c, errcode.ErrInternalServer)
-			return
-		}
-		if exists {
-			models.FailWithMessage(c, "Username already exists")
-			return
-		}
-	}
-
-	// 根据提供的信息进行注册
-	var err error
-	if req.Email != "" {
-		err = handler.userService.RegisterWithEmail(c, req.Email, req.Password)
-	} else {
-		err = handler.userService.RegisterWithUsername(c, req.Username, req.Password)
-	}
-
+	err := handler.userService.RegisterWithUsername(c, req.Username, req.Password)
 	if err != nil {
-		log.Errorf("registration failed: %v", err)
+		log.Errorf("registration with username failed: %v", err)
+		models.FailResult(c, errcode.ErrCustomError)
+		return
+	}
+
+	models.OkWithMessage(c, "Registration successful")
+}
+
+func (handler *UserHandler) RegisterWithEmailHandler(c *gin.Context) {
+	var req struct {
+		Email      string `json:"email" binding:"required,email"`
+		EmailVCode string `json:"email_vcode" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Warnf("register with email bind param err: %v", err)
+		models.FailResult(c, errcode.ErrInvalidParam)
+		return
+	}
+
+	err := handler.userService.RegisterWithEmail(c, req.Email, req.EmailVCode)
+	if err != nil {
+		log.Errorf("registration with email failed: %v", err)
+		models.FailResult(c, errcode.ErrInternalServer)
+		return
+	}
+
+	models.OkWithMessage(c, "Registration successful")
+}
+
+func (handler *UserHandler) RegisterWithPhoneHandler(c *gin.Context) {
+	var req struct {
+		Phone      string `json:"phone" binding:"required"`
+		PhoneVCode string `json:"phone_vcode" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Warnf("register with phone bind param err: %v", err)
+		models.FailResult(c, errcode.ErrInvalidParam)
+		return
+	}
+
+	err := handler.userService.RegisterWithPhone(c, req.Phone, req.PhoneVCode)
+	if err != nil {
+		log.Errorf("registration with phone failed: %v", err)
 		models.FailResult(c, errcode.ErrInternalServer)
 		return
 	}

@@ -4,6 +4,8 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+// Service 定义了 Service 接口
+// redis缓存在 service 层处理,db 在 repository 层处理
 type Service interface {
 	GetRepo() Repository
 	GetRedis() *redis.Client

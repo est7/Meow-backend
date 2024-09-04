@@ -2,8 +2,8 @@ package user
 
 import (
 	"Meow-backend/internal/interfaces"
+	factrory "Meow-backend/internal/interfaces/servicefactory"
 	"Meow-backend/internal/modules/v1/user/handler"
-	factrory "Meow-backend/internal/modules/v1/user/service"
 	"Meow-backend/pkg/auth"
 	"Meow-backend/pkg/log"
 	"github.com/gin-gonic/gin"
@@ -46,13 +46,19 @@ func (u *UserModule) RegisterRoutes(r *gin.Engine, authMiddleware func(auth.Perm
 	//6. 获取 sms 验证码 (Get SMS Code)
 	public := r.Group("/api/v1/user", authMiddleware(auth.Public))
 	{
-		public.POST("/register", u.handler.RegisterHandler)
+		public.POST("/register/username", u.handler.RegisterWithUsernameHandler)
+		public.POST("/register/email", u.handler.RegisterWithEmailHandler)
+		public.POST("/register/phone", u.handler.RegisterWithPhoneHandler)
+
+		public.POST("/login-username", u.handler.UsernameLoginHandler)
 		public.POST("/login-email", u.handler.EmailLoginHandler)
 		public.POST("/login-phone", u.handler.PhoneLoginHandler)
-		public.POST("/login-username", u.handler.UsernameLoginHandler)
+
 		public.POST("/forgot-password", u.handler.ForgotPasswordHandler)
 		public.POST("/reset-password", u.handler.ResetPasswordHandler)
+
 		public.POST("/refresh-token", u.handler.RefreshTokenHandler)
+
 		public.GET("/vcode", u.handler.VCode)     // 验证码
 		public.GET("/smscode", u.handler.SmsCode) // 短信验证码
 	}

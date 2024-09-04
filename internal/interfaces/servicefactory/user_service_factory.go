@@ -1,7 +1,8 @@
-package service
+package servicefactory
 
 import (
 	"Meow-backend/internal/interfaces"
+	"Meow-backend/internal/modules/v1/user/service"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -15,5 +16,10 @@ func NewUserServiceFactory(base interfaces.ServiceFactory) *UserServiceFactory {
 
 func (f *UserServiceFactory) CreateService(repo interfaces.Repository, redis *redis.Client) interfaces.Service {
 	baseService := f.ServiceFactory.CreateService(repo, redis)
-	return NewUserService(baseService)
+	return service.NewUserService(baseService)
+}
+
+func (f *UserServiceFactory) CreateCommonUserService(repo interfaces.Repository, redis *redis.Client) interfaces.CommonUserService {
+	baseService := f.ServiceFactory.CreateService(repo, redis)
+	return service.NewCommonUserService(baseService)
 }
