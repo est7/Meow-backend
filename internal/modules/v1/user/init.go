@@ -2,7 +2,7 @@ package user
 
 import (
 	"Meow-backend/internal/interfaces"
-	factrory "Meow-backend/internal/interfaces/servicefactory"
+	factrory "Meow-backend/internal/interfaces/factoryforservice"
 	"Meow-backend/internal/modules/v1/user/handler"
 	"Meow-backend/pkg/auth"
 	"Meow-backend/pkg/log"
@@ -16,9 +16,9 @@ type UserModule struct {
 
 func NewUserModule(ctx interfaces.AppContext) interfaces.Module {
 	repo := interfaces.NewRepository(ctx.GetGormDB())
-	serviceFactory := factrory.NewUserServiceFactory(interfaces.NewServiceFactory())
+	serviceFactory := factrory.NewUserServiceFactory()
 	service := serviceFactory.CreateService(repo, ctx.GetRedisClient())
-	userHandler := handler.NewUserHandler(interfaces.NewHandler(service))
+	userHandler := handler.NewUserHandler(service)
 
 	return &UserModule{
 		appCtx:  ctx,

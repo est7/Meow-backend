@@ -1,18 +1,18 @@
 package interfaces
 
 type Handler interface {
-	GetService() Service
+	GetService() BaseService
 }
 
 type BaseHandler struct {
-	Service Service
+	Service BaseService
 }
 
-func (h *BaseHandler) GetService() Service {
+func (h *BaseHandler) GetService() BaseService {
 	return h.Service
 }
 
-func NewHandler(service Service) Handler {
+func NewHandler(service BaseService) Handler {
 	return &BaseHandler{Service: service}
 }
 

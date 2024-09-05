@@ -12,9 +12,16 @@ type CardModule struct {
 }
 
 func NewCardModule(ctx interfaces.AppContext) interfaces.Module {
-	return &CardModule{ctx}
+	//repo := interfaces.NewRepository(ctx.GetGormDB())
+	//serviceFactory := factoryforservice.NewCardServiceFactory()
+	//service := serviceFactory.CreateService(repo, ctx.GetRedisClient())
+	//cardHandler := handler.NewCardHandler(service)
+	//return &CardModule{
+	//	appCtx:  ctx,
+	//	handler: cardHandler,
+	//}
+	return nil
 }
-
 func (u *CardModule) Name() string {
 	return "Card"
 }

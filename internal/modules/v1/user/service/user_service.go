@@ -5,6 +5,7 @@ import (
 	"Meow-backend/internal/models"
 	"Meow-backend/internal/modules/v1/user/repository"
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 )
 
 type PrivateUserService interface {
@@ -19,21 +20,21 @@ type UserService interface {
 }
 
 type UserServiceImpl struct {
-	interfaces.Service
+	interfaces.BaseService
 	userRepo *repository.UserRepositoryImpl
 }
 
-func NewUserService(base interfaces.Service) *UserServiceImpl {
+func NewUserService(base interfaces.BaseService) *UserServiceImpl {
 	return &UserServiceImpl{
-		Service:  base,
-		userRepo: repository.NewUserRepository(base.GetRepo()),
+		BaseService: base,
+		userRepo:    repository.NewUserRepository(base.GetRepo()),
 	}
 }
 
-func NewCommonUserService(base interfaces.Service) interfaces.CommonUserService {
-	return &UserServiceImpl{
-		Service:  base,
-		userRepo: repository.NewUserRepository(base.GetRepo()),
+func NewCommonUserService(repo interfaces.Repository, client *redis.Client) interfaces.CommonUserService {
+	return &CommonUserServiceImpl{
+		repo:   repo,
+		client: client,
 	}
 }
 

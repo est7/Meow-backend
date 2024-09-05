@@ -1,16 +1,15 @@
 package handler
 
 import (
-	"Meow-backend/internal/interfaces"
 	service "Meow-backend/internal/modules/v1/user/service"
 )
 
 type UserHandler struct {
-	userService *service.UserServiceImpl
+	userService service.UserService
 }
 
-func NewUserHandler(base interfaces.Handler) *UserHandler {
+func NewUserHandler(userService service.UserService) *UserHandler {
 	return &UserHandler{
-		userService: service.NewUserService(base.GetService()),
+		userService: userService,
 	}
 }

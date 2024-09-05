@@ -78,6 +78,6 @@ func healthCheck(c *gin.Context) {
 	if status == "UP" {
 		app.SuccessResponse(c, healthData)
 	} else {
-		app.ErrorResponse(c, errcode.NewCustomError(http.StatusServiceUnavailable, "Service is unhealthy"))
+		app.ErrorResponse(c, errcode.NewCustomError(http.StatusServiceUnavailable, "BaseService is unhealthy"))
 	}
 }

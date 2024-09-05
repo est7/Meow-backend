@@ -2,8 +2,8 @@ package im
 
 import (
 	"Meow-backend/internal/interfaces"
-	factory "Meow-backend/internal/interfaces/servicefactory"
-	"Meow-backend/internal/modules/v1/user/handler"
+	factory "Meow-backend/internal/interfaces/factoryforservice"
+	"Meow-backend/internal/modules/v1/im/handler"
 	"Meow-backend/pkg/auth"
 	"Meow-backend/pkg/log"
 	"github.com/gin-gonic/gin"
@@ -11,21 +11,19 @@ import (
 
 type IMModule struct {
 	appCtx  interfaces.AppContext
-	handler *handler.IMHander
+	handler *handler.IMHandler
 }
 
 func NewIMModule(ctx interfaces.AppContext) interfaces.Module {
 	repo := interfaces.NewRepository(ctx.GetGormDB())
-	userServiceFactory := factory.NewUserServiceFactory(interfaces.NewServiceFactory())
-	userService := userServiceFactory.CreateService(repo, ctx.GetRedisClient())
-
-	serviceFactory := factory.NewIMServiceFactory(interfaces.NewServiceFactory())
-	imHandler := handler.NewUserHandler(interfaces.NewHandler(service))
-	return &IMModule{appCtx: ctx,
-		handler: imHander,
+	serviceFactory := factory.NewIMServiceFactory()
+	imService := serviceFactory.CreateService(repo, ctx.GetRedisClient())
+	imHandler := handler.NewIMHandler(imService)
+	return &IMModule{
+		appCtx:  ctx,
+		handler: imHandler,
 	}
 }
-
 func (u *IMModule) Name() string {
 	return "IM"
 }

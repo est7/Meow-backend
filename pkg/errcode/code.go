@@ -6,7 +6,7 @@ package errcode
 var (
 	Success                     = NewCustomError(0, "Ok")
 	ErrInternalServer           = NewCustomError(10001, "Internal server error")                         // 服务器内部错误
-	ErrServiceUnavailable       = NewCustomError(10002, "Service unavailable")                           // 服务暂停
+	ErrServiceUnavailable       = NewCustomError(10002, "BaseService unavailable")                       // 服务暂停
 	ErrInvalidParam             = NewCustomError(10003, "Invalid params")                                // 参数错误
 	ErrUnauthorized             = NewCustomError(10004, "Unauthorized error")                            // 未授权
 	ErrNotFound                 = NewCustomError(10005, "Resource Not found")                            // 资源未找到

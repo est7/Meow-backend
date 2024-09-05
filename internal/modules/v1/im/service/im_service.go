@@ -7,32 +7,35 @@ import (
 )
 
 type IMService interface {
+	interfaces.BaseService
 	interfaces.CommonUserService
 	PrivateIMService
 }
 
 type IMServiceImpl struct {
-	interfaces.Service
-	CommonUserService interfaces.CommonUserService
-	imRepo            *repository.IMRepositoryImpl
+	interfaces.BaseService
+	interfaces.CommonUserService
+	imRepo *repository.IMRepositoryImpl
+}
+
+func NewIMService(base interfaces.BaseService, commonUserService interfaces.CommonUserService, repo interfaces.Repository) IMService {
+	return &IMServiceImpl{
+		BaseService:       base,
+		CommonUserService: commonUserService,
+		imRepo:            repository.NewIMRepository(repo),
+	}
 }
 
 type PrivateIMService interface {
-	EnterChatRoom()
+	EnterChatRoom() error
 }
 
-func NewIMService(base interfaces.Service, commonUserService interfaces.CommonUserService) *IMServiceImpl {
-	return &IMServiceImpl{
-		Service:           base,
-		CommonUserService: commonUserService,
-		imRepo:            repository.NewIMRepository(base.GetRepo()),
-	}
-}
-
-func (s *IMServiceImpl) EnterChatRoom() {
-	err := s.imRepo.CreateChatRoom(&models.BaseEntity{})
+func (s *IMServiceImpl) EnterChatRoom() error {
+	user, err := s.GetUserByID(313)
 	if err != nil {
-		return
+		return err
 	}
 
+	// Use the user object as needed
+	return s.imRepo.CreateChatRoom(&models.BaseEntity{})
 }
